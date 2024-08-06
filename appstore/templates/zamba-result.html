@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Zamba Data Display</title>
+    </head>
+    <body>
+        <h1>Zamba Classification Results</h1>
+        <p>Only result of selected most likely class will the display here. You can still download the CSV file to see the result.</p>
+        <table border="1">
+            <tr>
+                <th>Filepath</th>
+                <th>Classname</th>
+            </tr>
+            {% for item in result %}
+            <tr>
+                <td>{{ item.filepath }}</td>
+                <td>{{ item.classname }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <h2>Download the original CSV file <a href="{{url_for('download')}}">here</a></h2>
+        <button onclick="window.location.href='/zamba'">Back to Zamba</button>
+    </body>
+</html>
