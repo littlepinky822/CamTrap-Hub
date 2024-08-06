@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Zamba Train</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+    <body>
+        <h1>Zamba - Train a model on labeled videos or images</h1>
+        <p>For more detailed information, check the <a href="https://zamba.drivendata.org/docs/stable/train-tutorial/" target="_blank">User Tutorial</a>.</p>
+        
+        <h2>Upload a CSV containing the video labels to use as ground truth during training:</h2>
+        <p>There must be columns for both <code>filepath</code> and <code>label</code>.</p>
+        <form method="POST" enctype="multipart/form-data">
+            <label>CSV file: </label>
+            <input type="file" name="label-file" accept=".csv" />
+            <br>
+            <label>Videos for model training (at least 3 videos per label): </label>
+            <input type="file" name="training-video-file" multiple />
+            <br>
+            <input type="submit" value="Upload" />
+        </form>
+
+        <h3>Your uploaded label CSV file</h3>
+        {% if labelCsv %}
+            <ul>
+                <li>{{ labelCsv.filename }}</li>
+            </ul>
+        {% else %}
+            <p>No CSV file uploaded.</p>
+        {% endif %}
+
+        <h3>Your uploaded videos</h3>
+        {% if videofiles %}
+        <ul>
+            {% for video in videofiles %}
+                <li>{{ video.filename }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+            <p>No video files uploaded.</p>
+        {% endif %}
+
+        <!-- Configuration -->
+        <h2>Configuration</h2>
+        <p>If you wish to finetune an existing model, please the model here:</p>
+        <label for="model">Model:</label>
+        <select name="model" method="GET" action="/zamba/train" id="existing-model">
+            <option value="time_distributed" selected>time_distributed (default)</option>
+            <option value="blank_nonblank">blank_nonblank</option>
+            <option value="slowfast">slowfast</option>
+            <option value="european">european</option>
+        </select>
+        <br>
+        <label for="dryRun">Dry run:</label>
+        <select name="dryRun" method="GET" action="/zamba" id="dry-run">
+            <option value="false">false</option>
+            <option value="true" selected>true</option>
+        </select>
+        
+        <!-- Submit request -->
+        <p>Select the Train model button to confirm training the model. This process may take a while.</p>
+        <button onclick="triggerTrain()">Train model</button>
+
+        <!-- Display task status/progress when running classification -->
+        <div id="trainStatus"></div>
+        <div id="taskStatus"></div>
+        
+        <script>
+            function triggerTrain() {
+                var selectedModel = document.getElementById('existing-model').value;
+                var dryRun = document.getElementById('dry-run').value;
+                var labels = '{{ labelCsv.filename }}';
+
+                $.ajax({
+                    url: '/zamba/train/start',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ model:selectedModel, dryRun:dryRun, labels:labels }),
+                    success: function(response) {
+                        console.log(response);
+                        document.getElementById('trainStatus').innerHTML = 'Training started: ' + response.message + '<br>Task ID: ' + response.task_id;
+                        sessionStorage.setItem('taskID', response.task_id); // Store task ID in session storage for future use
+                    },
+                    error: function(response) {
+                        document.getElementById('result').innerHTML = 'Error: ' + response.responseJSON.error;
+                    }
+                });
+            }
+
+            function checkTaskStatus() {
+                var taskId = sessionStorage.getItem('taskID');
+                // var dryRun = document.getElementById('dry-run').value;
+                if (taskId) {
+                    fetch(`/task_status/${taskId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            message = data.result ? data.result.message : 'Not avaliable yet';
+                            output = data.result ? data.result.output : '';
+                            prettyOutput = output.replace(/\n/g, '<br>')
+                            document.getElementById('taskStatus').innerHTML = 'Task Status: ' + data.status + '<br>Message: ' + message + '<br>Output: ' + prettyOutput;
+
+                            if (data.status === 'SUCCESS') {
+                                clearInterval(interval);
+                            }
+                        });
+                }
+            }
+
+            // Get task status every minute and stop when success
+            var interval = setInterval(checkTaskStatus, 60000);
+        </script>
+    </body>
+</html>
