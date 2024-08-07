@@ -170,4 +170,4 @@ def task_status(task_id):
     return jsonify(data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
