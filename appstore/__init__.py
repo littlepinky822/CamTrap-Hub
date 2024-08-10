@@ -1,8 +1,11 @@
 from flask import Flask
+from flask_cors import CORS
 from sqlalchemy import create_engine
 from celery import Celery
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes
+
 app.config['SECRET_KEY'] = 'topsecretkey'
 app.config['UPLOAD_FOLDER'] = 'static/zamba/media'
 app.config['TRAIN_FOLDER'] = 'static/zamba/train'

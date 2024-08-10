@@ -1,0 +1,3 @@
+[submodule "trapper"]
+	path = trapper
+	url = https://gitlab.com/trapper-project/trapper.git

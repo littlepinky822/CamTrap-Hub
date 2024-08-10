@@ -1,11 +1,14 @@
 from appstore import app, engine, connection, celery
-from flask import render_template, request, jsonify, send_file
+from flask import render_template, redirect, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 import os, subprocess
 import pandas as pd
 from sqlalchemy import MetaData, Table
 from sqlalchemy.sql import text
 import json
+import docker
+import time
+import requests
 
 @app.route('/')
 @app.route('/home')
@@ -169,5 +172,58 @@ def task_status(task_id):
     }
     return jsonify(data)
 
+# Trapper
+@app.route('/trapper/start', methods=['POST'])
+def start_trapper():
+    start_trapper_endpoint()
+
+    max_retries = 60  # Increased to allow more time
+    retries = 0
+    trapper_url = "http://0.0.0.0:8000/"
+    while retries < max_retries:
+        if is_container_running('trapper') and is_trapper_ready(trapper_url):
+            return jsonify({'status': 'running', 'url': trapper_url}), 200
+        time.sleep(5)
+        retries += 1
+
+    return jsonify({'error': 'Failed to start Trapper', 'status': 'timeout'}), 500
+
+def start_trapper_endpoint():
+    trapper_start_path = '../trapper'
+    command = ['./start.sh', '-pb', 'dev']
+
+    try:
+        # Start the process and do not wait for it to complete
+        process = subprocess.Popen(command, cwd=trapper_start_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return jsonify({'message': 'Trapper start initiated'}), 202
+    except Exception as e:
+        return jsonify({'error': 'Failed to start Trapper', 'details': str(e)}), 500
+
+client = docker.from_env()
+
+def is_container_running(service_name):
+    try:
+        containers = client.containers.list(filters={'label': f'com.docker.compose.service={service_name}'})
+        return any(container.status == 'running' for container in containers)
+    except Exception as e:
+        print(f"Error checking container status: {e}")
+        return False
+
+# Health check for Trapper
+def is_trapper_ready(url, timeout=5):
+    try:
+        response = requests.get(url, timeout=timeout)
+        return response.status_code == 200
+    except requests.RequestException:
+        return False
+
+@app.route('/trapper/logs', methods=['GET'])
+def get_trapper_log():
+    container = client.containers.get('trapper')
+    logs = container.logs(tail=100)
+    with open('trapper.log', 'wb') as logFile:
+        logFile.write(logs)
+    return logs.decode('utf-8')
+
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

@@ -5,9 +5,35 @@
     </head>
     <body>
         <h1>Hello, world!</h1>
-        <button id="trapper">Trapper</button>
-        <button id="zamba">
-            <a href="https://www.zambacloud.com/">Zamba</a>
-        </button>
+        <button id="zamba">Zamba</button>
+        <button id="trapper" onclick="startTrapper()">Trapper</button>
+        <div id="loading" style="display: none;">Loading Trapper...</div>
+
+        <script>
+            function startTrapper() {
+                const loadingElement = document.getElementById('loading');
+                loadingElement.style.display = 'block';
+
+                fetch('/trapper/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'running') {
+                        window.location.href = data.url;
+                    } else {
+                        console.error('Failed to start Trapper:', data.error);
+                        loadingElement.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loadingElement.style.display = 'none';
+                });
+            }
+        </script>
     </body>
 </html>

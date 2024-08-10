@@ -1,4 +1,7 @@
+__pycache__
 venv/
+
+appstore/__pycache__/
 appstore/static/zamba/media/
 appstore/static/zamba/train/videos/
 
