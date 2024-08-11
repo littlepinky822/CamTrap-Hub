@@ -25,8 +25,6 @@ et-xmlfile==1.1.0
 ffmpeg-python==0.2.0
 filelock==3.15.4
 Flask==3.0.3
-Flask-SQLAlchemy==3.1.1
-Flask-WTF==1.2.1
 flower==2.0.1
 frozenlist==1.4.1
 fsspec==2024.6.1
@@ -121,6 +119,5 @@ worker==2018.4.1
 WTForms==3.1.2
 yacs==0.1.8
 yarl==1.9.4
-yolox @ git+https://github.com/r-b-g-b/YOLOX.git@12e23782aef9fb17cecc95ad6337c5e74d7f19f3
 zamba @ https://github.com/drivendataorg/zamba/releases/latest/download/zamba.tar.gz
 zipp==3.19.1

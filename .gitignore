@@ -1,4 +1,11 @@
+__pycache__/
+appstore/__pycache__/
+appstore/routes/__pycache__/
+appstore/templates/__pycache__/
+appstore/static/__pycache__/
+
 venv/
+
 appstore/static/zamba/media/
 appstore/static/zamba/train/videos/
 
