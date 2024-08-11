@@ -4,18 +4,25 @@ from sqlalchemy import create_engine
 from celery import Celery
 
 app = Flask(__name__)
-CORS(app) # Enable CORS for all routes
 
-app.config['SECRET_KEY'] = 'topsecretkey'
-app.config['UPLOAD_FOLDER'] = 'static/zamba/media'
-app.config['TRAIN_FOLDER'] = 'static/zamba/train'
-app.config['TRAIN_VIDEOS_FOLDER'] = 'static/zamba/train/videos'
+# Enable CORS for all routes
+CORS(app)
 
-celery = Celery(app.name, broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
+# Load configuration from config.py
+app.config.from_object('appstore.config')
+
+# Celery configuration
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'], backend=app.config['CELERY_RESULT_BACKEND'])
+celery.conf.update(app.config)
 
 # Database connection
-connection_string = 'mysql+pymysql://c22097859:Masterdata822!@csmysql.cs.cf.ac.uk:3306/c22097859_dissertation'
-engine = create_engine(connection_string, echo=True)
+engine = create_engine(app.config['DATABASE_URI'], echo=True)
 connection = engine.connect()
 
-from appstore import routes
+# Import and register blueprints
+from appstore.routes import main_bp, zamba_bp, trapper_bp, animl_bp
+
+app.register_blueprint(main_bp)
+app.register_blueprint(zamba_bp)
+app.register_blueprint(trapper_bp)
+app.register_blueprint(animl_bp)
