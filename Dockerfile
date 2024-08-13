@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     gcc \
     g++
 
+RUN apt-get update && apt-get install -y docker.io docker-compose
+
 # Set the working directory in the container
 WORKDIR /app
 

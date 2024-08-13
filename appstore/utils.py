@@ -4,9 +4,75 @@ from appstore import celery
 import subprocess
 import json
 import os
+import git
 import pandas as pd
 from sqlalchemy import text
 from appstore import connection, engine
+from appstore.models import AppMetadata
+
+# variables
+trapper_metadata = AppMetadata(
+    name="Trapper",
+    description="Trapper Expert - core web application for camera trap data management",
+    repository_url="https://gitlab.com/trapper-project/trapper.git",
+    docker_compose_file="docker-compose.yml",
+    start_command="./start.sh -pb dev",
+    stop_command="./start.sh prod stop"
+)
+animl_metadata = AppMetadata(
+    name="Animl",
+    description="Animl - core web application for animal detection",
+    repository_url="https://github.com/tnc-ca-geo/animl-frontend.git",
+    docker_image="registry.git.cf.ac.uk/c22097859/c22097859_cmt403_dissertation/animl:latest",
+    start_command="docker run -p 5173:5173 animl-container animl",
+    stop_command="docker stop animl-container"
+)
+
+# functions
+def create_app_metadata(app_metadata):
+    with engine.connect() as connection:
+        connection.execute(AppMetadata.__table__.insert().values(
+            name=app_metadata.name,
+            description=app_metadata.description,
+            repository_url=app_metadata.repository_url,
+            docker_compose_file=app_metadata.docker_compose_file,
+            docker_image=app_metadata.docker_image,
+            start_command=app_metadata.start_command,
+            stop_command=app_metadata.stop_command
+        ))
+
+def get_app_metadata(app_name):
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT * FROM app_metadata WHERE name = :name"), {"name": app_name}).fetchone()
+        return {
+            "name": result[1],
+            "description": result[2],
+            "repository_url": result[3],
+            "docker_compose_file": result[4],
+            "docker_image": result[5],
+            "start_command": result[6],
+            "stop_command": result[7]
+        }
+
+def is_container_exist(container_name):
+    client = docker.from_env()
+    try:
+        containers = client.containers.list(filters={'name': container_name})
+        return any(container.status == 'running' for container in containers)
+    except Exception as e:
+        print(f"Error checking container status: {e}")
+        return False
+
+def is_container_running_by_name(container_name):
+    client = docker.from_env()
+    try:
+        container = client.containers.get(container_name)
+        return container.status == 'running'
+    except docker.errors.NotFound:
+        return False
+    except Exception as e:
+        print(f"Error checking container status: {e}")
+        return False
 
 def is_container_running(service_name):
     client = docker.from_env()
@@ -17,13 +83,14 @@ def is_container_running(service_name):
         print(f"Error checking container status: {e}")
         return False
 
-def is_trapper_ready(url, timeout=5):
+def is_server_ready(url, timeout=5):
     try:
         response = requests.get(url, timeout=timeout)
         return response.status_code == 200
     except requests.RequestException:
         return False
 
+# celery tasks
 @celery.task(name='train_zamba_task')
 def train_zamba_task(model, dryRun, labels, data_dir='appstore/static/zamba/train/videos'):
     command = ['zamba', 'train', '--data-dir', data_dir, '--labels', labels, '--model', model, '-y']

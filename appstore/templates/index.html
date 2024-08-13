@@ -19,7 +19,13 @@
                     }
                 })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    if (data.status === 'running') {
+                        window.location.href = data.url;
+                    } else {
+                        console.error('Failed to start Animl:', data.error);
+                    }
+                })
                 .catch(error => console.error('Error:', error));
             }
             function startTrapper() {
