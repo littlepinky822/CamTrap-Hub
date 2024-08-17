@@ -4,10 +4,14 @@ import os
 SECRET_KEY = 'your_secret_key_here'
 DEBUG = True
 
-# File upload settings
+# Zamba file upload settings
 UPLOAD_FOLDER = 'static/zamba/media'
 TRAIN_FOLDER = 'static/zamba/train'
 TRAIN_VIDEOS_FOLDER = 'static/zamba/train/videos'
+
+# Megadetector file upload settings
+MEGADETECTOR_UPLOAD_FOLDER = 'static/megadetector/images'
+MEGADETECTOR_MAIN_FOLDER = 'static/megadetector'
 
 # Celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'

@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from celery import Celery
 from appstore.models import Base, AppMetadata
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # Enable CORS for all routes
 CORS(app)
@@ -22,12 +22,13 @@ connection = engine.connect()
 Base.metadata.create_all(engine)
 
 # Import and register blueprints
-from appstore.routes import main_bp, zamba_bp, trapper_bp, animl_bp
+from appstore.routes import main_bp, zamba_bp, trapper_bp, animl_bp, megadetector_bp
 
 app.register_blueprint(main_bp)
 app.register_blueprint(zamba_bp)
 app.register_blueprint(trapper_bp)
 app.register_blueprint(animl_bp)
+app.register_blueprint(megadetector_bp)
 
 # Import utils after app initialization
 from appstore.utils import trapper_metadata, create_app_metadata, animl_metadata

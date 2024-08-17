@@ -1,0 +1,63 @@
+<DOCTYPE html>
+    <html>
+        <head>
+            <title>MegaDetector</title>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        </head>
+        <body>
+            <h1>MegaDetector</h1>
+            <p>MegaDetector is an AI model that identifies animals, people, and vehicles in camera trap images (which also makes it useful for eliminating blank images).</p>
+
+            <form action="/megadetector" method="post" enctype="multipart/form-data">
+                <label for="image">Upload an image:</label>
+                <input type="file" name="image" id="image" accept="image/*" multiple>
+                <br>
+                <input type="submit" value="Upload">
+            </form>
+            <br>
+            <form action="/megadetector/run/batch" method="post" enctype="multipart/form-data" id="batchForm">
+                <label for="model">Select a model:</label>
+                <select name="model" id="model">
+                    <option value="MDV5A" selected>MDv5a</option>
+                    <option value="MDV5B">MDv5b</option>
+                    <option value="MDV4">MDv4</option>
+                </select>
+                <br>
+                <div id="warning" style="color: red; font-weight: bold; display: none;">
+                    <p>Warning: MDv4 is not recommended, please only select this if you have a really good reason to do so.</p>
+                </div>
+                <input type="submit" value="Run Batch">
+            </form>
+
+            <button onclick="window.location.href='/megadetector/report'">View Report</button>
+
+            <script>
+                document.getElementById('model').addEventListener('change', function() {
+                    const modelFileInput = document.getElementById('warning');
+                    if (this.value === 'MDV4') {
+                        modelFileInput.style.display = 'block';
+                    } else {
+                        modelFileInput.style.display = 'none';
+                    }
+                });
+
+                document.getElementById('batchForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    
+                    fetch('/megadetector/run/batch', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            </script>
+        </body>
+    </html>
+</DOCTYPE>
