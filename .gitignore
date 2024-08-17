@@ -12,3 +12,5 @@ appstore/static/zamba/train/videos/
 process-result.json
 process-result-dryrun.json
 status.json
+
+megedetector/

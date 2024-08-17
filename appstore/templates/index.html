@@ -4,9 +4,10 @@
         <title>Home Page</title>
     </head>
     <body>
-        <h1>Hello, world!</h1>
+        <h1>Camera Trapper App Store</h1>
         <button id="animl" onclick="startAniml()">Animl</button>
         <button id="zamba" onclick="window.location.href='/zamba'">Zamba</button>
+        <button id="megadetector" onclick="window.location.href='/megadetector'">MegaDetector</button>
         <button id="trapper" onclick="startTrapper()">Trapper</button>
         <div id="loading" style="display: none;">Loading Trapper...</div>
 
@@ -19,7 +20,13 @@
                     }
                 })
                 .then(response => response.json())
-                .then(data => console.log(data))
+                .then(data => {
+                    if (data.status === 'running') {
+                        window.location.href = data.url;
+                    } else {
+                        console.error('Failed to start Animl:', data.error);
+                    }
+                })
                 .catch(error => console.error('Error:', error));
             }
             function startTrapper() {
