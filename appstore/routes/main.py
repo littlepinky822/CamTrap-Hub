@@ -30,3 +30,8 @@ def serve_user_files(filepath):
         relative_path = filepath.split('templates/')[-1]
         return send_from_directory(os.path.join(current_app.root_path, 'templates'), relative_path)
     return "File not found", 404
+
+# TEST: Render JSON reponse for the frontend
+@bp.route('/test')
+def test():
+    return jsonify({'message': 'Render successful!'})

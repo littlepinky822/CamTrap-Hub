@@ -8,16 +8,13 @@ import subprocess
 
 bp = Blueprint('megadetector', __name__, url_prefix='/megadetector')
 
-@bp.route('/', methods=['GET', 'POST'])
-def megadetector():
-    if request.method == 'POST':
-        # image = request.files['image']
-        images = request.files.getlist('image')
-        for image in images:
-            image.save(os.path.join(os.path.dirname(__file__), '..', app.config['MEGADETECTOR_UPLOAD_FOLDER'], image.filename))
-        return render_template('megadetector.html')
-    else:
-        return render_template('megadetector.html')
+@bp.route('/upload', methods=['POST'])
+def megadetector_upload():
+    # images = request.files.getlist('image')
+    images = request.form.getlist('image')
+    for image in images:
+        image.save(os.path.join(os.path.dirname(__file__), '..', app.config['MEGADETECTOR_UPLOAD_FOLDER'], image.filename))
+    return jsonify({"status": "success", "message": "Images uploaded"})
 
 @bp.route('/run/batch', methods=['POST'])
 def megadetector_run_batch():
