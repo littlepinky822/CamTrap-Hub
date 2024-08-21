@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import NavBar from './NavBar';
 
 const MegaDetector = () => {
     const [model, setModel] = useState('MDV5A');
@@ -56,34 +57,79 @@ const MegaDetector = () => {
     };
 
     return (
-        <div>
-            <h1>MegaDetector</h1>
-            <p>MegaDetector is an AI model that identifies animals, people, and vehicles in camera trap images (which also makes it useful for eliminating blank images).</p>
+        <div className="min-h-screen bg-base">
+            <NavBar />
+            <div className="container mx-auto px-4 py-8">
+                <h1 className="text-4xl font-bold mb-4 text-center text-primary">MegaDetector</h1>
+                <p className="text-lg mb-8 text-center text-gray-700">
+                    MegaDetector is an AI model that identifies animals, people, and vehicles in camera trap images (which also makes it useful for eliminating blank images).
+                </p>
 
-            <form onSubmit={handleUpload} enctype="multipart/form-data">
-                <label htmlFor="image">Upload an image:</label>
-                <input type="file" name="image" id="image" accept="image/*" multiple />
-                <br />
-                <input type="submit" value="Upload" />
-            </form>
-            <br />
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="model">Select a model:</label>
-                <select name="model" id="model" onChange={handleModelChange}>
-                    <option value="MDV5A">MDv5a</option>
-                    <option value="MDV5B">MDv5b</option>
-                    <option value="MDV4">MDv4</option>
-                </select>
-                <br />
-                {model === 'MDV4' && (
-                    <div style={{ color: 'red', fontWeight: 'bold' }}>
-                        <p>Warning: MDv4 is not recommended, please only select this if you have a really good reason to do so.</p>
-                    </div>
-                )}
-                <input type="submit" value="Run Batch" />
-            </form>
+                <div className="bg-base-200 shadow-md rounded-lg p-6 mb-8">
+                    <h2 className="text-2xl font-semibold mb-4">Upload Images</h2>
+                    <form onSubmit={handleUpload} className="space-y-4">
+                        <div>
+                            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
+                                Upload image(s):
+                            </label>
+                            <input
+                                type="file"
+                                name="image"
+                                id="image"
+                                accept="image/*"
+                                multiple
+                                className="file-input file-input-primary bg-white w-full max-w-xs"
+                            />
+                        </div>
+                        <button type="submit" className="btn btn-primary">Upload</button>
+                    </form>
+                </div>
 
-            <button onClick={() => window.open('/megadetector/report', '_blank')}>View Report</button>
+                <div className="bg-base-200 shadow-md rounded-lg p-6">
+                    <h2 className="text-2xl font-semibold mb-4">Run MegaDetector</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="flex flex-col">
+                            <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-2">
+                                Select a model:
+                            </label>
+                            <div className="dropdown dropdown-bottom">
+                                <div tabIndex={0} role="button" className="btn m-1 w-full max-w-xs bg-white">
+                                    {model ? model : 'Select model'}
+                                </div>
+                                <ul tabIndex={0} className="dropdown-content menu z-[1] p-2 shadow rounded-box bg-white w-full max-w-xs">
+                                    <li><a onClick={() => setModel('MDV5A')}>MDv5a</a></li>
+                                    <li><a onClick={() => setModel('MDV5B')}>MDv5b</a></li>
+                                    <li><a onClick={() => setModel('MDV4')}>MDv4</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {model === 'MDV4' && (
+                            <div role="alert" className="alert alert-warning">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 shrink-0 stroke-current"
+                                    fill="none"
+                                    viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                    />
+                                </svg>
+                                <span>Warning: MDv4 is not recommended, please only select this if you have a really good reason to do so.</span>
+                            </div>
+                        )}
+                        <button type="submit" className="btn btn-primary">Run Batch</button>
+                    </form>
+                </div>
+
+                <div className="mt-8 text-center">
+                    <button className="btn btn-secondary" onClick={() => window.open('/megadetector/report', '_blank')}>
+                        View Report
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
