@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import NavBar from './NavBar';
+import { ThemeContext } from '../ThemeContext';
 
 const MegaDetector = () => {
+    const { theme, setTheme } = useContext(ThemeContext);
     const [model, setModel] = useState('MDV5A');
     const [uploadedFiles, setUploadedFiles] = useState([]);
 
@@ -58,7 +60,7 @@ const MegaDetector = () => {
 
     return (
         <div className="min-h-screen bg-base">
-            <NavBar />
+            <NavBar theme={theme} setTheme={setTheme}/>
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-4xl font-bold mb-4 text-center text-primary">MegaDetector</h1>
                 <p className="text-lg mb-8 text-center text-gray-700">

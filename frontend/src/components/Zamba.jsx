@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import NavBar from './NavBar';
 import ZambaProcess from './ZambaProcess';
 import ZambaTrain from './ZambaTrain';
+import { ThemeContext } from '../ThemeContext';
 
 const Zamba = () => {
     const [activeTab, setActiveTab] = useState('classification');
+    const { theme, setTheme } = useContext(ThemeContext);
 
     return (
         <div className="min-h-screen bg-base">
-            <NavBar />
+            <NavBar theme={theme} setTheme={setTheme}/>
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-4xl font-bold mb-4 text-center text-primary">Zamba</h1>
                 <div role="tablist" className="tabs tabs-boxed">

@@ -48,13 +48,30 @@ function Preview({ appInfo, onClose }) {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-lg max-w-2xl w-full">
-                <h2 className="text-2xl font-bold mb-4">{appInfo.name}</h2>
-                <img src={appInfo.image} alt={appInfo.name} className="w-full h-64 object-cover mb-4" />
-                <p className="mb-4">{appInfo.description}</p>
+                <div className="flex flex-row items-center">
+                    <img src={appInfo.logo} alt={appInfo.name} className="w-32 h-32 object-cover mr-4" />
+                    <div className="flex flex-col">
+                        <h2 className="text-2xl font-bold mb-4 text-primary">{appInfo.name}</h2>
+                        <div className="rating mb-2">
+                            <input type="radio" name="rating-1" className="mask mask-star bg-secondary" />
+                            <input type="radio" name="rating-1" className="mask mask-star bg-secondary" />
+                            <input type="radio" name="rating-1" className="mask mask-star bg-secondary" />
+                            <input type="radio" name="rating-1" className="mask mask-star bg-secondary" defaultChecked />
+                            <input type="radio" name="rating-1" className="mask mask-star bg-secondary" />
+                        </div>
+                        <div className="mb-4">
+                            {appInfo.tags.map((tag, index) => (
+                                <span key={index} className="badge badge-outline mr-2">{tag}</span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <div className="divider"></div>
+                <h3 className="text-xl text-primary font-bold mb-4">Description</h3>
                 <div className="mb-4">
-                    {appInfo.tags.map((tag, index) => (
-                        <span key={index} className="badge badge-outline mr-2">{tag}</span>
-                    ))}
+                    {appInfo.full_description.split('\n').map((line, index) => {
+                        return <p key={index}>{line}</p>
+                    })}
                 </div>
                 <div className="flex justify-between">
                     <button className="btn btn-primary" onClick={() => {
