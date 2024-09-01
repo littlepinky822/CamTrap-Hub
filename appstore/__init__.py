@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from celery import Celery
 from appstore.models import Base, AppMetadata
 
-# app = Flask(__name__, static_folder='static', template_folder='templates')
-app = Flask(__name__, static_folder='../frontend', static_url_path='/')
+app = Flask(__name__, static_folder='static', template_folder='templates')
+# app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 
 # Enable CORS for all routes
 CORS(app)
@@ -23,20 +23,23 @@ connection = engine.connect()
 Base.metadata.create_all(engine)
 
 # Import and register blueprints
-from appstore.routes import main_bp, zamba_bp, trapper_bp, animl_bp, megadetector_bp
+from appstore.routes import main_bp, zamba_bp, trapper_bp, animl_bp, megadetector_bp, ecosecrets_bp, il2bb_bp, camera_trap_tools_bp
 
 app.register_blueprint(main_bp)
 app.register_blueprint(zamba_bp)
 app.register_blueprint(trapper_bp)
 app.register_blueprint(animl_bp)
 app.register_blueprint(megadetector_bp)
+app.register_blueprint(ecosecrets_bp)
+app.register_blueprint(il2bb_bp)
+app.register_blueprint(camera_trap_tools_bp)
 
 # Import utils after app initialization
-from appstore.utils import trapper_metadata, create_app_metadata, animl_metadata
+from appstore.utils import trapper_metadata, create_app_metadata, animl_metadata, ecosecrets_metadata, il2bb_metadata, cameratraptools_metadata
 from sqlalchemy import text
 
 # Create Trapper metadata if it doesn't exist
-for app_name in ['Trapper', 'Animl']:
+for app_name in ['Trapper', 'Animl', 'EcoSecrets', 'IL2BB', 'CameraTrapTools']:
     result = connection.execute(text("SELECT * FROM app_metadata WHERE name = :name"), {"name": app_name}).fetchone()
     if not result:
         app_metadata = globals()[f"{app_name.lower()}_metadata"]

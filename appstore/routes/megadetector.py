@@ -52,11 +52,17 @@ def postprocess_results(output_file, image_folder):
 
 @bp.route('/report')
 def megadetector_report():
-    return render_template('megadetector-results/index.html')
+    # return render_template('megadetector-results/index.html')
+    with open(os.path.join(current_app.root_path, 'templates', 'megadetector-results', 'index.html'), 'r') as file:
+        html_content = file.read()
+    return jsonify({"html_content": html_content})
 
 @bp.route('/detections_animal.html')
 def megadetector_detections_animal_report():
-    return render_template('megadetector-results/detections_animal.html')
+    # return render_template('megadetector-results/detections_animal.html')
+    with open(os.path.join(current_app.root_path, 'templates', 'megadetector-results', 'detections_animal.html'), 'r') as file:
+        html_content = file.read()
+    return jsonify({"html_content": html_content})
 
 @bp.route('/detections_animal/<path:filename>')
 def serve_detections_animal(filename):

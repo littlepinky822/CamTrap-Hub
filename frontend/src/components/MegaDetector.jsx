@@ -17,7 +17,7 @@ const MegaDetector = () => {
             formData.append('image', files[i]);
         }
 
-        fetch('/megadetector/upload', {
+        fetch('/api/megadetector/upload', {
             method: 'POST',
             body: formData
         })
@@ -37,15 +37,11 @@ const MegaDetector = () => {
         });
     }
 
-    const handleModelChange = (e) => {
-        setModel(e.target.value);
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
 
-        fetch('/megadetector/run/batch', {
+        fetch('/api/megadetector/run/batch', {
             method: 'POST',
             body: formData
         })

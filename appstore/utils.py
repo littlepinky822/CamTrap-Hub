@@ -6,7 +6,7 @@ import json
 import os
 import git
 import pandas as pd
-from sqlalchemy import text
+from sqlalchemy import text, types
 from appstore import connection, engine
 from appstore.models import AppMetadata
 
@@ -26,6 +26,30 @@ animl_metadata = AppMetadata(
     docker_image="registry.git.cf.ac.uk/c22097859/c22097859_cmt403_dissertation/animl:latest",
     start_command="docker run -p 5173:5173 animl-container animl",
     stop_command="docker stop animl-container"
+)
+ecosecrets_metadata = AppMetadata(
+    name="EcoSecrets",
+    description="EcoSecrets - core web application for camera trap data management",
+    repository_url="https://github.com/naturalsolutions/ecoSecrets.git",
+    docker_compose_file="docker-compose.yml",
+    start_command="./scripts/docker.sh up -d",
+    stop_command="./scripts/docker.sh down"
+)
+il2bb_metadata = AppMetadata(
+    name="IL2BB",
+    description="IL2BB - a pipeline automates the generation of labeled bounding boxes",
+    repository_url="https://github.com/persts/IL2BB",
+    docker_image="registry.git.cf.ac.uk/c22097859/c22097859_cmt403_dissertation/il2bb:latest",
+    start_command="docker run il2bb-container il2bb",
+    stop_command="docker stop il2bb-container"
+)
+cameratraptools_metadata = AppMetadata(
+    name="CameraTrapTools",
+    description="Camera Trap Tools - a collection of tools for camera trap data management",
+    repository_url="https://github.com/persts/CameraTrapTools",
+    docker_image="registry.git.cf.ac.uk/c22097859/c22097859_cmt403_dissertation/camera-trap-tools:latest",
+    start_command="docker run camera-trap-tools-container camera-trap-tools",
+    stop_command="docker stop camera-trap-tools-container"
 )
 
 # functions
@@ -146,7 +170,17 @@ def parseCSV(filePath):
     # Read CSV using pandas
     csvDataFrame = pd.read_csv(filePath)
     csvDataFrame.rename(columns={'0': 'classname'}, inplace=True)
+    csvDataFrame['timestamp'] = pd.Timestamp.now()
 
     # Insert data into the database
-    connection.execute(text("CREATE TABLE IF NOT EXISTS zamba_csv (filepath VARCHAR(255), classname VARCHAR(255))"))
-    csvDataFrame.to_sql('zamba_csv', con=engine, index=False, if_exists='append')
+    connection.execute(text("CREATE TABLE IF NOT EXISTS zamba_csv (filepath VARCHAR(255), classname VARCHAR(255), timestamp TIMESTAMP, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"))
+    
+    # Convert timestamp to datetime before inserting into database
+    csvDataFrame['timestamp'] = pd.to_datetime(csvDataFrame['timestamp'])
+    
+    csvDataFrame.to_sql('zamba_csv', con=engine, index=False, if_exists='append', dtype={'timestamp': types.DateTime()})
+
+    # Verify that the data was inserted correctly
+    result = connection.execute(text("SELECT * FROM zamba_csv LIMIT 5"))
+    for row in result:
+        print(row)

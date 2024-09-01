@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import NavBar from './NavBar';
 
 function ZambaProcess() {
     const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -19,7 +18,7 @@ function ZambaProcess() {
             formData.append('file', files[i]);
         }
 
-        fetch('/zamba/upload', {
+        fetch('/api/zamba/upload', {
             method: 'POST',
             body: formData,
         })
@@ -39,7 +38,7 @@ function ZambaProcess() {
     }
 
     const triggerProcess = () => {
-        fetch('/zamba/process', {
+        fetch('/api/zamba/process', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -62,7 +61,7 @@ function ZambaProcess() {
         let interval;
         if (taskId) {
             interval = setInterval(() => {
-                fetch(`/task_status/${taskId}`)
+                fetch(`/api/task_status/${taskId}`)
                     .then(response => response.json())
                     .then(data => {
                         console.log(data);

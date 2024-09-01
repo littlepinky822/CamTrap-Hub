@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import NavBar from './NavBar';
+import { ThemeContext } from '../ThemeContext';
 
 function ZambaResult() {
+    const { theme, setTheme } = useContext(ThemeContext);
     const [results, setResults] = useState([]);
     useEffect(() => {
         getResult().then(data => {
@@ -10,14 +12,14 @@ function ZambaResult() {
     }, []);
 
     const getResult = async () => {
-        const response = await fetch('/zamba/result');
+        const response = await fetch('/api/zamba/result');
         const data = await response.json();
         console.log(data);
         return data;
     }
 
     const handleDownload = () => {
-        fetch('/zamba/download')
+        fetch('/api/zamba/download')
             .then(response => {
                 if (response.ok) {
                     return response.blob();
@@ -39,7 +41,7 @@ function ZambaResult() {
 
     return (
         <div className='min-h-screen bg-base'>
-            <NavBar />
+            <NavBar theme={theme} setTheme={setTheme}/>
             <div className='container mx-auto px-4 py-8'>
                 <h1 className='text-4xl font-bold mb-4 text-center text-primary'>Zamba Classification Results</h1>
                 <p className='text-lg mb-8 text-center text-primary'>Only result of selected most likely class will be displayed here. You can still download the CSV file to see the full result.</p>

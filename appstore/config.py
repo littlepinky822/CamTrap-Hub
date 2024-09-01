@@ -13,6 +13,14 @@ TRAIN_VIDEOS_FOLDER = 'static/zamba/train/videos'
 MEGADETECTOR_UPLOAD_FOLDER = 'static/megadetector/images'
 MEGADETECTOR_MAIN_FOLDER = 'static/megadetector'
 
+# IL2BB file upload settings
+IL2BB_MAIN_FOLDER = 'static/il2bb'
+IL2BB_UPLOAD_FOLDER = 'static/il2bb/images'
+
+# Camera Trap Tools file upload settings
+CAMERA_TRAP_TOOLS_MAIN_FOLDER = 'static/camera-trap-tools'
+CAMERA_TRAP_TOOLS_UPLOAD_FOLDER = 'static/camera-trap-tools/images'
+
 # Celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'

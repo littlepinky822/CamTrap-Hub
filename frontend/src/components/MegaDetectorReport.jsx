@@ -8,7 +8,7 @@ const MegaDetectorReport = () => {
     const { theme, setTheme } = useContext(ThemeContext);
 
     useEffect(() => {
-        fetch('/megadetector/report')
+        fetch('/api/megadetector/report')
             .then(response => response.json())
             .then(data => {setHtmlContent(data.html_content);
             })
@@ -43,7 +43,7 @@ const MegaDetectorDetectionsAnimalReport = () => {
     const { theme, setTheme } = useContext(ThemeContext);
     
     useEffect(() => {
-        fetch('/megadetector/detections_animal.html')
+        fetch('/api/megadetector/detections_animal.html')
             .then(response => response.json())
             .then(data => {setHtmlContent(data.html_content);
             })

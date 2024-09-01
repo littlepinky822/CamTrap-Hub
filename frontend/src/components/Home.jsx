@@ -68,7 +68,44 @@ function Home() {
         tags: ['Object Detection', 'Filtering']
     };
 
-    const allApps = [animlInfo, zambaInfo, megadetectorInfo, trapperInfo];
+    const ecosecretsInfo = {
+        name: 'EcoSecrets',
+        description: 'EcoSecrets is a web application enabling users to manage their camera traps data.',
+        full_description: `ecoSecrets is an open-source web application that aims to facilitate biodiversity studies that use autonomous data collection devices such as camera traps. This web-application is in development and offers several features that meet the needs of biodiversity stakeholders:
+                            \n• project management: to delimit the studies according to their context
+                            \n• management of study sites: to identify spatial scope
+                            \n• device management: to specify technical characteristics of the tools used in the field and their availability
+                            \n• deployment management: to characterize spatio-temporal limits of data acquisition
+                            \n• media management: to standardize and optimize the storage of collected data
+                            \n• media processing: to enable the addition of annotations to the raw data`,
+        logo: 'https://raw.githubusercontent.com/naturalsolutions/ecoSecrets/main/frontend/public/assets/ecosecrets-logo-icon.svg',
+        image: 'https://raw.githubusercontent.com/naturalsolutions/ecoSecrets/main/frontend/public/assets/ecosecrets_logo_full_light.svg',
+        link: 'http://localhost:8889/',
+        tags: ['Data management', 'Processing']
+    };
+
+    const il2bbInfo = {
+        name: 'IL2BB',
+        description: 'Image Level Label to Bounding Box Pipeline',
+        full_description: `The Image Level Label to Bounding Box (IL2BB) pipeline automates the generation of labeled bounding boxes by leveraging an organization’s previous labeling efforts and Microsoft AI for Earth’s MegaDetector. The output of this pipeline are batches of images with annotation files that can be opened, reviewed, and modified with the Bounding Box Editor and Exporter (BBoxEE) to prepare training data for object detectors.
+                            The IL2BB pipeline is especially useful for organizations that are hesitant or not permitted to use or store data on online services.`,
+        logo: 'https://github.com/yan-tung-lam/il2bb/blob/main/logo.png?raw=true',
+        image: 'https://github.com/yan-tung-lam/il2bb/blob/main/logo.png?raw=true',
+        link: '/il2bb',
+        tags: ['Classification']
+    };
+
+    const cameraTrapToolsInfo = {
+        name: 'Camera Trap Tools',
+        description: 'Camera Trap Tools is a collection of tools for managing camera trap data.',
+        full_description: `Camera Trap Tools is a collection of tools for managing camera trap data.`,
+        logo: 'https://github.com/yan-tung-lam/il2bb/blob/main/logo.png?raw=true',
+        image: 'https://github.com/yan-tung-lam/il2bb/blob/main/logo.png?raw=true',
+        link: '/camera-trap-tools',
+        tags: ['Data management']
+    };
+
+    const allApps = [animlInfo, zambaInfo, megadetectorInfo, trapperInfo, ecosecretsInfo, il2bbInfo, cameraTrapToolsInfo];
     const [filteredApps, setFilteredApps] = useState(allApps);
 
     const handleSearch = () => {

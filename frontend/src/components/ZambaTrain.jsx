@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import NavBar from './NavBar';
 
 function ZambaTrain() {
     const [labelCsv, setLabelCsv] = useState(null);
@@ -14,7 +13,7 @@ function ZambaTrain() {
         let interval;
         if (taskId) {
             interval = setInterval(() => {
-                fetch(`/task_status/${taskId}`)
+                fetch(`/api/task_status/${taskId}`)
                     .then(response => response.json())
                     .then(data => {
                         console.log(data);
@@ -38,7 +37,7 @@ function ZambaTrain() {
     const handleUpload = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        fetch('/zamba/train/upload', {
+        fetch('/api/zamba/train/upload', {
             method: 'POST',
             body: formData,
         })
@@ -62,7 +61,7 @@ function ZambaTrain() {
             return;
         }
 
-        fetch('/zamba/train/start', {
+        fetch('/api/zamba/train/start', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

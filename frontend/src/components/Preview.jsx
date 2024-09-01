@@ -3,7 +3,7 @@ import React from 'react';
 function Preview({ appInfo, onClose }) {
 
     const onClickAniml = () => {
-        fetch('/animl/start', {
+        fetch('/api/animl/start', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -24,7 +24,7 @@ function Preview({ appInfo, onClose }) {
         const loadingElement = document.getElementById('loading');
         loadingElement.style.display = 'block';
 
-        fetch('/trapper/start', {
+        fetch('/api/trapper/start', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -44,6 +44,80 @@ function Preview({ appInfo, onClose }) {
                 loadingElement.style.display = 'none';
             });
     };
+
+    const onClickEcoSecrets = () => {
+        const loadingElement = document.getElementById('loading');
+        loadingElement.style.display = 'block';
+
+        fetch('/api/ecosecrets/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'running') {
+                console.log('opening', data.url);
+                window.open(data.url, '_blank');
+            } else {
+                console.error('Failed to start EcoSecrets:', data.error);
+                loadingElement.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            loadingElement.style.display = 'none';
+        });
+    };
+
+    const onClickIl2bb = async () => {
+        const loadingElement = document.getElementById('loading');
+        loadingElement.style.display = 'block';
+
+        try {
+            const response = await fetch('/api/il2bb/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            const data = await response.json();
+            if (data.status ==='running') {
+                console.log('opening IL2BB URL');
+                window.location.href = appInfo.link;
+            } else {
+                console.error('Failed to start IL2BB:', data.error);
+                loadingElement.style.display = 'none';
+            }
+        }
+        catch (error) {
+            console.error('Error:', error);
+            loadingElement.style.display = 'none';
+        }
+    }
+
+    const onClickCameraTrapTools = () => {
+        const loadingElement = document.getElementById('loading');
+        loadingElement.style.display = 'block';
+
+        fetch('/api/camera-trap-tools/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'running') {
+                window.location.href = '/camera-trap-tools';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            loadingElement.style.display = 'none';
+        });
+    }
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -79,7 +153,15 @@ function Preview({ appInfo, onClose }) {
                             onClickAniml();
                         } else if (appInfo.name === 'Trapper') {
                             onClickTrapper();
-                        } else (window.location.href = appInfo.link)
+                        } else if (appInfo.name === 'EcoSecrets') {
+                            onClickEcoSecrets();
+                        } else if (appInfo.name === 'IL2BB') {
+                            onClickIl2bb();
+                        } else if (appInfo.name === 'Camera Trap Tools') {
+                            onClickCameraTrapTools();
+                        } else {
+                            window.location.href = appInfo.link;
+                        }
                     }}>Go to {appInfo.name}</button>
                     <span id="loading" style={{ display: 'none' }} className="loading loading-spinner loading-xs"></span>
                     <button className="btn btn-secondary" onClick={onClose}>Close</button>
