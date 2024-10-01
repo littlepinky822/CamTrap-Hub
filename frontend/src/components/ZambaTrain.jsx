@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react'
+import ImageBrowserPopup from './ImageBrowserPopup';
 
 function ZambaTrain() {
     const [labelCsv, setLabelCsv] = useState(null);
-    const [videofiles, setVideofiles] = useState([]);
     const [trainStatus, setTrainStatus] = useState('');
     const [taskStatus, setTaskStatus] = useState('');
     const [taskId, setTaskId] = useState(null);
     const [model, setModel] = useState('time_distributed');
     const [dryRun, setDryRun] = useState('false');
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [allowedTypes, setAllowedTypes] = useState([]);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
 
     useEffect(() => {
         let interval;
@@ -34,18 +37,36 @@ function ZambaTrain() {
         return () => clearInterval(interval);
     }, [taskId]);
 
-    const handleUpload = (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
+    const handleOpenFileBrowser = () => {
+        let allowedTypes = ['video'];
+        console.log('Setting allowed types:', allowedTypes);  // Add this log
+        setAllowedTypes(allowedTypes);
+        document.getElementById('file_browser_modal').showModal();
+    };
+
+    const handleSelectItems = (items) => {
+        setSelectedItems(items);
+    };
+
+    const handleUpload = () => {
+        const formData = new FormData();
+
+        if (labelCsv) {
+            formData.append('labelCsv', labelCsv);
+        }
+
+        selectedItems.forEach(item => {
+            formData.append('videos', item.path);
+        });
+
         fetch('/api/zamba/train/upload', {
             method: 'POST',
             body: formData,
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Received data:', data);
-            setLabelCsv(data.labelCsv);
-            setVideofiles(data.videofiles);
+            console.log(data);
+            setUploadSuccess(true);
         })
         .catch(error => {
             console.error('Error uploading files:', error);
@@ -54,7 +75,6 @@ function ZambaTrain() {
 
     function triggerTrain() {
         const labels = labelCsv ? (labelCsv.filename || labelCsv) : '';
-        // const dryRun = document.getElementById('dry-run').value;
 
         if (!labels) {
             setTrainStatus('Error: No label file specified');
@@ -95,49 +115,48 @@ function ZambaTrain() {
                 <div className="bg-base-200 shadow-md rounded-lg p-6 mb-8">
                     <h2 className="text-2xl font-semibold mb-4 text-gray-700">Upload a CSV containing the video labels to use as ground truth during training:</h2>
                     <p className="mb-4">There must be columns for both <code>filepath</code> and <code>label</code>.</p>
-                    <form encType="multipart/form-data" onSubmit={handleUpload} className="space-y-4">
-                        <div>
-                            <label htmlFor="label-file" className="block text-sm font-medium text-gray-700 mb-2">
-                                CSV file:
-                            </label>
-                            <input 
-                                type="file" 
-                                name="label-file" 
-                                accept=".csv" 
-                                className="file-input file-input-bordered file-input-primary bg-white w-full max-w-xs" 
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="training-video-file" className="block text-sm font-medium text-gray-700 mb-2">
-                                Videos for model training (at least 3 videos per label):
-                            </label>
-                            <input 
-                                type="file" 
-                                name="training-video-file" 
-                                multiple 
-                                className="file-input file-input-bordered file-input-primary bg-white w-full max-w-xs" 
-                            />
-                        </div>
-                        <button type="submit" className="btn btn-primary">Upload</button>
-                    </form>
-
-                    {labelCsv && (
-                        <div className="mt-4">
-                            <p className="font-semibold">Selected label CSV file:</p>
-                            <ul>
-                                <li>{labelCsv}</li>
-                            </ul>
-                        </div>
-                    )}
-
-                    {videofiles.length > 0 && (
-                        <div className='mt-4'>
-                            <p className='font-semibold'>Selected videos:</p>
-                            <ul>
-                                {videofiles.map((video, index) => (
-                                    <li key={index}>{video}</li>
-                                ))}
-                            </ul>
+                    {/* CSV file upload */}
+                    <div>
+                        <label htmlFor="labelCsv" className="block text-sm font-medium text-gray-700 mb-2">
+                            CSV file:
+                        </label>
+                        <input
+                            type="file"
+                            name="labelCsv"
+                            accept=".csv"
+                            className="file-input file-input-bordered file-input-primary bg-white w-full max-w-xs"
+                            onChange={(e) => setLabelCsv(e.target.files[0])}
+                        />
+                        {labelCsv && (
+                            <div className="mt-4">
+                                <p className="font-semibold">Selected label CSV file:</p>
+                                <ul>
+                                    <li>{labelCsv.name}</li>
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                    {/* Videos upload */}
+                    <div className='mt-2'>
+                        <label htmlFor="videos" className="block text-sm font-medium text-gray-700 mb-2">
+                            Videos:
+                        </label>
+                        <button onClick={() => handleOpenFileBrowser()} name="videos" className="btn btn-primary mr-2">Select Videos</button>
+                        {selectedItems.length > 0 && (
+                            <div className="mt-4">
+                                <h3>Selected Images/Videos:</h3>
+                                <ul>
+                                    {selectedItems.map((item, index) => (
+                                        <li key={index}>{item.name} ({item.type})</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                    <button className='btn btn-primary mt-4' onClick={handleUpload}>Upload Selected Items</button>
+                    {uploadSuccess && (
+                        <div role="alert" className="alert alert-success mt-4">
+                            <span>Uploaded successfully!</span>
                         </div>
                     )}
                 </div>
@@ -186,6 +205,7 @@ function ZambaTrain() {
                 <div className='mt-4'>{trainStatus}</div>
                 <div className='mt-4'>{taskStatus}</div>
             </div>
+            <ImageBrowserPopup onSelect={handleSelectItems} allowedTypes={allowedTypes} />
         </div>
     )
 }

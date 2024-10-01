@@ -26,7 +26,8 @@ def start_trapper():
 
 def start_trapper_endpoint():
     app_metadata = get_app_metadata("Trapper")
-    repo_dir = f"/tmp/trapper"
+    # repo_dir = f"/tmp/trapper"
+    repo_dir = os.path.join(os.path.dirname(__file__), '..', 'repos', 'trapper')
     
     try:
         # clone the repository if doesn't exist

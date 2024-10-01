@@ -1,11 +1,28 @@
 import React, { useContext } from 'react';
 import { ThemeContext } from '../ThemeContext';
+import { useAuth } from './AuthContext';
 
 function NavBar() {
     const { theme, setTheme } = useContext(ThemeContext);
+    const { isLoggedIn, currentUser, checkLoginStatus } = useAuth();
+
     const toogleTheme = () => {
         const newTheme = theme === 'nature' ? 'night' : 'nature';
         setTheme(newTheme);
+    };
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        await checkLoginStatus();
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
     };
 
     return (
@@ -40,6 +57,24 @@ function NavBar() {
                     <li><a onClick={() => window.location.href = '/'}>Home</a></li>
                     <li><a>About</a></li>
                     <li><a>Contact</a></li>
+                    {isLoggedIn ? (
+                        <div className="dropdown dropdown-end">
+                            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar placeholder">
+                            <div className="bg-neutral text-neutral-content w-10 rounded-full">
+                                <span>{currentUser.username.charAt(0).toUpperCase()}</span>
+                            </div>
+                            </div>
+                            <ul
+                                tabIndex={0}
+                                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+                                <li><a>Profile</a></li>
+                                <li><a onClick={() => window.location.href = '/datamanagement'}>Data management</a></li>
+                                <li><a onClick={handleLogout}>Logout</a></li>
+                            </ul>
+                        </div>
+                    ) : (
+                        <li><a onClick={() => window.location.href = '/login'}>Login</a></li>
+                    )}
                 </ul>
             </div>
         </div>

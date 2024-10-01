@@ -1,21 +1,46 @@
 import React, { useState, useContext } from 'react';
 import NavBar from './NavBar';
 import { ThemeContext } from '../ThemeContext';
+import ImageBrowserPopup from './ImageBrowserPopup';
 
 const MegaDetector = () => {
     const { theme, setTheme } = useContext(ThemeContext);
     const [model, setModel] = useState('MDV5A');
-    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [allowedTypes, setAllowedTypes] = useState([]);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    const handleUpload = (e) => {
-        e.preventDefault();
+    const handleOpenFileBrowser = (type) => {
+        let allowedTypes;
+        switch (type) {
+            case 'image':
+                allowedTypes = ['image'];
+                break;
+            case 'video':
+                allowedTypes = ['video'];
+                break;
+            case 'folder':
+                allowedTypes = ['folder'];
+                break;
+            default:
+                allowedTypes = ['image', 'video', 'folder'];
+        }
+        console.log('Setting allowed types:', allowedTypes);  // Add this log
+        setAllowedTypes(allowedTypes);
+        document.getElementById('file_browser_modal').showModal();
+    };
+
+    const handleSelectItems = (items) => {
+        setSelectedItems(items);
+    };
+
+    const handleUpload = () => {
         const formData = new FormData();
-        const files = e.target.image.files;
 
         // Append each file to the FormData object
-        for (let i = 0; i < files.length; i++) {
-            formData.append('image', files[i]);
-        }
+        selectedItems.forEach(item => {
+            formData.append('image', item.path);
+        });
 
         fetch('/api/megadetector/upload', {
             method: 'POST',
@@ -25,12 +50,8 @@ const MegaDetector = () => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+            setUploadSuccess(true);
             return response.text();
-        })
-        .then(data => {
-            // Update state with the names of uploaded files
-            setUploadedFiles(Array.from(files).map(file => file.name));
-            console.log('Uploaded files: ', Array.from(files).map(file => file.name));
         })
         .catch(error => {
             console.error('Error:', error);
@@ -65,22 +86,24 @@ const MegaDetector = () => {
 
                 <div className="bg-base-200 shadow-md rounded-lg p-6 mb-8">
                     <h2 className="text-2xl font-semibold mb-4">Upload Images</h2>
-                    <form onSubmit={handleUpload} className="space-y-4">
-                        <div>
-                            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
-                                Upload image(s):
-                            </label>
-                            <input
-                                type="file"
-                                name="image"
-                                id="image"
-                                accept="image/*"
-                                multiple
-                                className="file-input file-input-primary bg-white w-full max-w-xs"
-                            />
+                    <button onClick={() => handleOpenFileBrowser('image')} className="btn btn-primary mr-2">Select Images</button>
+                    {selectedItems.length > 0 && (
+                        <div className="mt-4">
+                            <h3>Selected Images:</h3>
+                            <ul>
+                                {selectedItems.map((item, index) => (
+                                    <li key={index}>{item.name} ({item.type})</li>
+                                ))}
+                            </ul>
                         </div>
-                        <button type="submit" className="btn btn-primary">Upload</button>
-                    </form>
+                    )}
+                    <br />
+                    <button className='btn btn-primary mt-4' onClick={handleUpload}>Confirm Upload</button>
+                    {uploadSuccess && (
+                        <div role="alert" className="alert alert-success mt-4">
+                            <span>Uploaded successfully!</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="bg-base-200 shadow-md rounded-lg p-6">
@@ -128,6 +151,7 @@ const MegaDetector = () => {
                     </button>
                 </div>
             </div>
+            <ImageBrowserPopup onSelect={handleSelectItems} allowedTypes={allowedTypes} />
         </div>
     );
 };

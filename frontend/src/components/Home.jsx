@@ -105,7 +105,17 @@ function Home() {
         tags: ['Data management']
     };
 
-    const allApps = [animlInfo, zambaInfo, megadetectorInfo, trapperInfo, ecosecretsInfo, il2bbInfo, cameraTrapToolsInfo];
+    const wildCoFaceBlurInfo = {
+        name: 'WildCo-FaceBlur',
+        description: 'WildCo-FaceBlur is a tool for blurring faces in camera trap images.',
+        full_description: `WildCo-FaceBlur is a tool for blurring faces in camera trap images.`,
+        logo: 'https://github.com/yan-tung-lam/il2bb/blob/main/logo.png?raw=true',
+        image: 'https://github.com/yan-tung-lam/il2bb/blob/main/logo.png?raw=true',
+        link: '/wildcofaceblur',
+        tags: ['Processing']
+    };
+
+    const allApps = [animlInfo, zambaInfo, megadetectorInfo, trapperInfo, ecosecretsInfo, il2bbInfo, cameraTrapToolsInfo, wildCoFaceBlurInfo];
     const [filteredApps, setFilteredApps] = useState(allApps);
 
     const handleSearch = () => {

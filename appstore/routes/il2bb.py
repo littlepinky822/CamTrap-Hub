@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, send_file
 from werkzeug.utils import secure_filename
-from appstore import app
+from appstore import app, s3_client
 from appstore.utils import get_app_metadata, is_container_running_by_name, is_server_ready
 import docker
 import os
@@ -11,6 +11,8 @@ import zipfile
 
 bp = Blueprint("il2bb", __name__, url_prefix="/il2bb")
 client = docker.from_env()
+BUCKET_NAME = app.config['S3_BUCKET_NAME']
+S3_FOLDER = 'uploads'
 
 @bp.route("/start", methods=["GET", "POST"])
 def start_l2bb():
@@ -62,16 +64,36 @@ def upload_il2bb():
     mapping_dest_path = '/app/data'
 
     # Save mapping CSV file to local directory
-    mappingCsv = request.files.get('mapping-file')
+    mappingCsv = request.files.get('mappingFile')
     mappingCsvFilename = None
     if mappingCsv and mappingCsv.filename != '':
         mappingCsvFilename = secure_filename(mappingCsv.filename)
         mappingCsv.save(os.path.join(mapping_src_path, mappingCsvFilename))
 
     # Save image files to local directory
-    images = request.files.getlist('image-files')
-    for image in images:
-        image.save(os.path.join(img_src_path, image.filename)) 
+    uploaded_images = []
+    image_paths = request.form.getlist('images')
+    for s3_path in image_paths:
+        try:
+            # Extract the filename from the S3 path
+            filename = os.path.basename(s3_path)
+            local_file_path = os.path.join(img_src_path, filename)
+            print("Local file path: ", local_file_path)
+            
+            # Download the file from S3
+            s3_client.download_file(BUCKET_NAME, s3_path, local_file_path)
+            
+            if os.path.exists(local_file_path):
+                uploaded_images.append(filename)
+            else:
+                return jsonify({"status": "error", "message": f"Failed to download {filename} from S3"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Error processing {s3_path}: {str(e)}"})
+    
+    if len(uploaded_images) == len(image_paths):
+        print("Images downloaded from S3")
+    else:
+        print("Some images failed to download from S3. Files: ", uploaded_images)
     
     # Create a tar archive of the uploaded files
     tar_stream = io.BytesIO()
@@ -91,8 +113,6 @@ def upload_il2bb():
     return jsonify({
         "status": "success",
         "message": "Images and mapping CSV file uploaded",
-        "imageFiles": [image.filename for image in images],
-        "mappingFile": mappingCsv.filename
         }), 202
 
 @bp.route("/trigger_stage1", methods=["POST"])

@@ -7,7 +7,7 @@ import os
 import git
 import pandas as pd
 from sqlalchemy import text, types
-from appstore import connection, engine
+from appstore import db
 from appstore.models import AppMetadata
 
 # variables
@@ -51,32 +51,33 @@ cameratraptools_metadata = AppMetadata(
     start_command="docker run camera-trap-tools-container camera-trap-tools",
     stop_command="docker stop camera-trap-tools-container"
 )
+wildcofaceblur_metadata = AppMetadata(
+    name="WildCoFaceBlur",
+    description="WildCoFaceBlur - a pipeline for face blurring",
+    repository_url="https://github.com/mitch-fen/WildCo-FaceBlur.git",
+    docker_image="registry.git.cf.ac.uk/c22097859/c22097859_cmt403_dissertation/wildco-faceblur:latest",
+    start_command="docker run wildco-faceblur-container wildco-faceblur",
+    stop_command="docker stop wildco-faceblur-container"
+)
 
 # functions
 def create_app_metadata(app_metadata):
-    with engine.connect() as connection:
-        connection.execute(AppMetadata.__table__.insert().values(
-            name=app_metadata.name,
-            description=app_metadata.description,
-            repository_url=app_metadata.repository_url,
-            docker_compose_file=app_metadata.docker_compose_file,
-            docker_image=app_metadata.docker_image,
-            start_command=app_metadata.start_command,
-            stop_command=app_metadata.stop_command
-        ))
+    db.session.add(app_metadata)
+    db.session.commit()
 
 def get_app_metadata(app_name):
-    with engine.connect() as connection:
-        result = connection.execute(text("SELECT * FROM app_metadata WHERE name = :name"), {"name": app_name}).fetchone()
-        return {
-            "name": result[1],
-            "description": result[2],
-            "repository_url": result[3],
-            "docker_compose_file": result[4],
-            "docker_image": result[5],
-            "start_command": result[6],
-            "stop_command": result[7]
-        }
+    result = AppMetadata.query.filter_by(name=app_name).first()
+    if result is None:
+        return None  # or raise an exception if you prefer
+    return {
+        "name": result.name,
+        "description": result.description,
+        "repository_url": result.repository_url,
+        "docker_compose_file": result.docker_compose_file,
+        "docker_image": result.docker_image,
+        "start_command": result.start_command,
+        "stop_command": result.stop_command
+    }
 
 def is_container_exist(container_name):
     client = docker.from_env()
@@ -173,14 +174,15 @@ def parseCSV(filePath):
     csvDataFrame['timestamp'] = pd.Timestamp.now()
 
     # Insert data into the database
-    connection.execute(text("CREATE TABLE IF NOT EXISTS zamba_csv (filepath VARCHAR(255), classname VARCHAR(255), timestamp TIMESTAMP, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"))
+    db.session.add(csvDataFrame)
+    db.session.commit()    
     
     # Convert timestamp to datetime before inserting into database
     csvDataFrame['timestamp'] = pd.to_datetime(csvDataFrame['timestamp'])
     
-    csvDataFrame.to_sql('zamba_csv', con=engine, index=False, if_exists='append', dtype={'timestamp': types.DateTime()})
+    csvDataFrame.to_sql('zamba_csv', con=db.engine, index=False, if_exists='append', dtype={'timestamp': types.DateTime()})
 
     # Verify that the data was inserted correctly
-    result = connection.execute(text("SELECT * FROM zamba_csv LIMIT 5"))
+    result = db.session.execute(text("SELECT * FROM zamba_csv LIMIT 5"))
     for row in result:
         print(row)

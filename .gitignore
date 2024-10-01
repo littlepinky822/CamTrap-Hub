@@ -6,6 +6,11 @@ appstore/static/__pycache__/
 
 venv/
 
+appstore/repos/
+
+appstore/static/camera-trap-tools/images/
+appstore/static/il2bb/images
+appstore/static/megedetector/images
 appstore/static/zamba/media/
 appstore/static/zamba/train/videos/
 

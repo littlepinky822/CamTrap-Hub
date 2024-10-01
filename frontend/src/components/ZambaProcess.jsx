@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import ImageBrowserPopup from './ImageBrowserPopup';
 
 function ZambaProcess() {
     const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -8,15 +9,28 @@ function ZambaProcess() {
     const [dryRun, setDryRun] = useState('false');
     const [outputClassname, setOutputClassname] = useState('true');
     const [selectedModel, setSelectedModel] = useState('time_distributed');
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [allowedTypes, setAllowedTypes] = useState([]);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    const handleUpload = (e) => {
-        e.preventDefault();
+
+    const handleOpenFileBrowser = () => {
+        let allowedTypes = ['image', 'video'];
+        console.log('Setting allowed types:', allowedTypes);  // Add this log
+        setAllowedTypes(allowedTypes);
+        document.getElementById('file_browser_modal').showModal();
+    };
+
+    const handleSelectItems = (items) => {
+        setSelectedItems(items);
+    };
+
+    const handleUpload = () => {
         const formData = new FormData();
-        const files = e.target.file.files;
 
-        for (let i = 0; i < files.length; i++) {
-            formData.append('file', files[i]);
-        }
+        selectedItems.forEach(item => {
+            formData.append('file', item.path);
+        });
 
         fetch('/api/zamba/upload', {
             method: 'POST',
@@ -26,11 +40,8 @@ function ZambaProcess() {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+            setUploadSuccess(true);
             return response.json();
-        })
-        .then(data => {
-            setUploadedFiles(data.files);
-            console.log('Uploaded files: ', data.files);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -86,31 +97,22 @@ function ZambaProcess() {
                 <div className="bg-base-200 shadow-md rounded-lg p-6 mb-8">
                     <h2 className="text-2xl font-semibold mb-4 text-gray-700">Upload videos/images for processing</h2>
                     <p className="mb-4">Only upload one type (video/image) at a time.</p>
-                    <form onSubmit={handleUpload} className="space-y-4">
-                        <div>
-                            <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-2">
-                                Upload file(s):
-                            </label>
-                            <input
-                                type="file"
-                                name="file"
-                                id="file"
-                                multiple
-                                onChange={(e) => setUploadedFiles(Array.from(e.target.files))}
-                                className="file-input file-input-bordered file-input-primary bg-white w-full max-w-xs"
-                            />
-                        </div>
-                        <button type="submit" className="btn btn-primary">Upload</button>
-                    </form>
-
-                    {uploadedFiles.length > 0 && (
+                    <button onClick={() => handleOpenFileBrowser()} className="btn btn-primary mr-2">Select Images/Videos</button>
+                    {selectedItems.length > 0 && (
                         <div className="mt-4">
-                            <p className="font-semibold">Selected files:</p>
-                            <ul className="list-disc list-inside">
-                                {uploadedFiles.map((file, index) => (
-                                    <li key={index}>{file.name}</li>
+                            <h3>Selected Images/Videos:</h3>
+                            <ul>
+                                {selectedItems.map((item, index) => (
+                                    <li key={index}>{item.name} ({item.type})</li>
                                 ))}
                             </ul>
+                        </div>
+                    )}
+                    <br />
+                    <button className='btn btn-primary mt-4' onClick={handleUpload}>Confirm Upload</button>
+                    {uploadSuccess && (
+                        <div role="alert" className="alert alert-success mt-4">
+                            <span>Uploaded successfully!</span>
                         </div>
                     )}
                 </div>
@@ -194,6 +196,7 @@ function ZambaProcess() {
                     See results
                 </button>
             </div>
+            <ImageBrowserPopup onSelect={handleSelectItems} allowedTypes={allowedTypes} />
         </div>
     )
 }

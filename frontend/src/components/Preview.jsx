@@ -119,6 +119,28 @@ function Preview({ appInfo, onClose }) {
         });
     }
 
+    const onClickWildCoFaceBlur = () => {
+        const loadingElement = document.getElementById('loading');
+        loadingElement.style.display = 'block';
+
+        fetch('/api/wildCoFaceBlur/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'running') {
+                window.location.href = '/wildCoFaceBlur';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            loadingElement.style.display = 'none';
+        });
+    }
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-lg max-w-2xl w-full">
@@ -159,6 +181,8 @@ function Preview({ appInfo, onClose }) {
                             onClickIl2bb();
                         } else if (appInfo.name === 'Camera Trap Tools') {
                             onClickCameraTrapTools();
+                        } else if (appInfo.name === 'WildCo-FaceBlur') {
+                            onClickWildCoFaceBlur();
                         } else {
                             window.location.href = appInfo.link;
                         }

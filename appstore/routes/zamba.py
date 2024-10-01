@@ -1,27 +1,44 @@
 from flask import Blueprint, render_template, request, jsonify, send_file
-from appstore import celery, app
+from appstore import celery, app, s3_client
 from appstore.utils import process_zamba_task, train_zamba_task
 from sqlalchemy import MetaData, Table
-from appstore import engine, connection
+from appstore import db
 from werkzeug.utils import secure_filename
 import os
 
 bp = Blueprint('zamba', __name__, url_prefix='/zamba')
+BUCKET_NAME = app.config['S3_BUCKET_NAME']
+S3_FOLDER = 'uploads'
 
 @bp.route('/upload', methods=['POST'])
 def zamba_upload():
-    files = request.files.getlist('file')
+    if not request.form:
+        return jsonify({'error': 'Missing required files'}), 400
+    file_paths = request.form.getlist('file')
+    upload_folder = os.path.join(os.path.dirname(__file__), '..', app.config['UPLOAD_FOLDER'])
+
     uploaded_files = []
-    for file in files:
-        if file:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', app.config['UPLOAD_FOLDER'], filename))
-            uploaded_files.append(filename)
-    return jsonify({
-        "status": "success", 
-        "message": "Images/Videos uploaded",
-        "files": uploaded_files
-    })
+    for s3_path in file_paths:
+        try:
+            # Extract the filename from the S3 path
+            filename = os.path.basename(s3_path)
+            local_file_path = os.path.join(upload_folder, filename)
+            print("Local file path: ", local_file_path)
+            
+            # Download the file from S3
+            s3_client.download_file(BUCKET_NAME, s3_path, local_file_path)
+            
+            if os.path.exists(local_file_path):
+                uploaded_files.append(filename)
+            else:
+                return jsonify({"status": "error", "message": f"Failed to download {filename} from S3"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Error processing {s3_path}: {str(e)}"})
+    
+    if len(uploaded_files) == len(file_paths):
+        return jsonify({"status": "success", "message": "Images downloaded from S3", "files": uploaded_files})
+    else:
+        return jsonify({"status": "partial_success", "message": "Some images failed to download from S3", "files": uploaded_files})
 
 # Classifying unlabeled videos
 @bp.route('/process', methods=['POST'])
@@ -41,12 +58,12 @@ def process():
 @bp.route('/result', methods=['GET'])
 def get_result():
     print('start get result')
-    metadata = MetaData(bind=engine)
+    metadata = MetaData(bind=db.engine)
     zamba_csv = Table('zamba_csv', metadata, autoload=True)
 
     # get results from the database
     query = zamba_csv.select()
-    result = connection.execute(query)
+    result = db.session.execute(query)
     print('result: ', result)
 
     # Convert the SQL result to a list of dictionaries
@@ -67,28 +84,39 @@ def download():
 # Training a model
 @bp.route('/train/upload', methods=['POST'])
 def train_upload():
-    # Initialize variables to None or empty
-    labelCsv = None
-    videofiles = []
+    uploaded_videos = []
+    upload_folder = os.path.join(os.path.dirname(__file__), '..', app.config['TRAIN_FOLDER'])
+    upload_videos_folder = os.path.join(os.path.dirname(__file__), '..', app.config['TRAIN_VIDEOS_FOLDER'])
     
     # Handle label CSV
-    labelCsv = request.files.get('label-file')
+    labelCsv = request.files.get('labelCsv')
     if labelCsv and labelCsv.filename != '':
         labelCsvFilename = secure_filename(labelCsv.filename)
-        labelCsv.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', app.config['TRAIN_FOLDER'], labelCsvFilename))
+        labelCsv.save(os.path.join(upload_folder, labelCsvFilename))
 
     # Handle video files
-    videofiles = request.files.getlist('training-video-file')
-    for video in videofiles:
-        if video.filename:  # Ensure there is a filename
-            videoname = secure_filename(video.filename)
-            video.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', app.config['TRAIN_VIDEOS_FOLDER'], videoname))
-
-    return jsonify({
-        'message': 'Training files uploaded',
-        'labelCsv': labelCsv.filename,
-        'videofiles': [video.filename for video in videofiles]
-    }), 202
+    videofile_paths = request.form.getlist('videos')
+    for s3_path in videofile_paths:
+        try:
+            # Extract the filename from the S3 path
+            filename = os.path.basename(s3_path)
+            local_file_path = os.path.join(upload_videos_folder, filename)
+            print("Local file path: ", local_file_path)
+            
+            # Download the file from S3
+            s3_client.download_file(BUCKET_NAME, s3_path, local_file_path)
+            
+            if os.path.exists(local_file_path):
+                uploaded_videos.append(filename)
+            else:
+                return jsonify({"status": "error", "message": f"Failed to download {filename} from S3"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Error processing {s3_path}: {str(e)}"})
+    
+    if len(uploaded_videos) == len(videofile_paths):
+        return jsonify({"status": "success", "message": "Images downloaded from S3", "files": uploaded_videos})
+    else:
+        return jsonify({"status": "partial_success", "message": "Some images failed to download from S3", "files": uploaded_videos})
 
 @bp.route('/train/start', methods=['POST'])
 def train_start():

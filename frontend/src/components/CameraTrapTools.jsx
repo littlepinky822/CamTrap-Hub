@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import NavBar from './NavBar';
 import { ThemeContext } from '../ThemeContext';
+import ImageBrowserPopup from './ImageBrowserPopup';
 
 const CameraTrapTools = () => {
     const [activeTab, setActiveTab] = useState('imageProcessing');
@@ -29,17 +30,34 @@ const CameraTrapTools = () => {
 const CameraTrapToolsProcessing = () => {
     const [success, setSuccess] = useState(false);
     const [videoSuccess, setVideoSuccess] = useState(false);
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [allowedTypes, setAllowedTypes] = useState([]);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    const handleUpload = async (e) => {
-        e.preventDefault();
+    const handleOpenFileBrowser = () => {
+        let allowedTypes = ['image'];
+        setAllowedTypes(allowedTypes);
+        document.getElementById('file_browser_modal').showModal();
+    };
+
+    const handleSelectItems = (items) => {
+        setSelectedItems(items);
+    };
+
+    const handleUpload = async () => {
         try {
-            const formData = new FormData(e.target);
+            const formData = new FormData();
+
+            selectedItems.forEach(item => {
+                formData.append('images', item.path);
+            });
 
             const response = await fetch('/api/camera-trap-tools/autocopy/upload', {
                 method: 'POST',
                 body: formData
             })
             const data = await response.json()
+            setUploadSuccess(true);
             console.log(data);
         }
         catch(error) {
@@ -135,21 +153,28 @@ const CameraTrapToolsProcessing = () => {
                     <h2 className="text-3xl font-semibold mb-4 text-center">Autocopy</h2>
                     <p className="text-sm text-gray-700 text-center">Downloading and automatic renaming of images from SD cards.</p>
                     <h3 className="text-2xl font-semibold mb-4">Upload Images for renaming</h3>
-                    <form onSubmit={handleUpload} className="space-y-4">
-                        <div>
-                            <label htmlFor="image-files" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Upload image(s):
-                                </label>
-                                <input
-                                    type="file"
-                                    name="image-files"
-                                    accept="image/*"
-                                    multiple
-                                    className="file-input file-input-primary bg-white w-full max-w-xs"
-                                />
+                    <div>
+                        <label htmlFor="images" className="block text-sm font-medium text-gray-700 mb-2">
+                            Upload image(s):
+                        </label>
+                        <button onClick={() => handleOpenFileBrowser()} name="images" className="btn btn-primary mr-2">Select Images</button>
+                        {selectedItems.length > 0 && (
+                            <div className="mt-4">
+                                <h3>Selected Images/Videos:</h3>
+                                <ul>
+                                    {selectedItems.map((item, index) => (
+                                        <li key={index}>{item.name} ({item.type})</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                    <button className='btn btn-primary mt-4' onClick={handleUpload}>Upload Selected Images</button>
+                    {uploadSuccess && (
+                        <div role="alert" className="alert alert-success mt-4">
+                            <span>Uploaded successfully!</span>
                         </div>
-                        <button type="submit" className="btn btn-primary">Upload</button>
-                    </form>
+                    )}
 
                     <label className="label cursor-pointer justify-start">
                         <span className="label-text mr-4">Activate animal detection? </span>
@@ -221,6 +246,7 @@ const CameraTrapToolsProcessing = () => {
                     <button className='btn btn-secondary mt-4' onClick={handleDownloadVideos}>Download videos</button>
                 </div>
             </div>
+            <ImageBrowserPopup onSelect={handleSelectItems} allowedTypes={allowedTypes} />
         </div>
     );
 };

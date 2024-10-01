@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template, jsonify, send_file, send_from_directory, current_app
-from appstore import app
+from appstore import app, s3_client
 from megadetector.detection.run_detector_batch import load_and_run_detector_batch, write_results_to_file
 from megadetector.postprocessing.postprocess_batch_results import process_batch_results, PostProcessingOptions
 from megadetector.utils import path_utils
@@ -7,14 +7,39 @@ import os
 import subprocess
 
 bp = Blueprint('megadetector', __name__, url_prefix='/megadetector')
+BUCKET_NAME = app.config['S3_BUCKET_NAME']
+S3_FOLDER = 'uploads'
 
 @bp.route('/upload', methods=['POST'])
 def megadetector_upload():
-    # images = request.files.getlist('image')
-    images = request.form.getlist('image')
-    for image in images:
-        image.save(os.path.join(os.path.dirname(__file__), '..', app.config['MEGADETECTOR_UPLOAD_FOLDER'], image.filename))
-    return jsonify({"status": "success", "message": "Images uploaded"})
+    if not request.form:
+        return jsonify({'error': 'Missing required files'}), 400
+    
+    image_paths = request.form.getlist('image')
+    upload_folder = os.path.join(os.path.dirname(__file__), '..', app.config['MEGADETECTOR_UPLOAD_FOLDER'])
+    
+    uploaded_files = []
+    for s3_path in image_paths:
+        try:
+            # Extract the filename from the S3 path
+            filename = os.path.basename(s3_path)
+            local_file_path = os.path.join(upload_folder, filename)
+            print("Local file path: ", local_file_path)
+            
+            # Download the file from S3
+            s3_client.download_file(BUCKET_NAME, s3_path, local_file_path)
+            
+            if os.path.exists(local_file_path):
+                uploaded_files.append(filename)
+            else:
+                return jsonify({"status": "error", "message": f"Failed to download {filename} from S3"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Error processing {s3_path}: {str(e)}"})
+    
+    if len(uploaded_files) == len(image_paths):
+        return jsonify({"status": "success", "message": "Images downloaded from S3", "files": uploaded_files})
+    else:
+        return jsonify({"status": "partial_success", "message": "Some images failed to download from S3", "files": uploaded_files})
 
 @bp.route('/run/batch', methods=['POST'])
 def megadetector_run_batch():
@@ -22,6 +47,7 @@ def megadetector_run_batch():
     image_folder = os.path.join(os.path.dirname(__file__), '..', app.config['MEGADETECTOR_UPLOAD_FOLDER'])
     output_file = os.path.join(os.path.dirname(__file__), '..', app.config['MEGADETECTOR_MAIN_FOLDER'], 'output.json')
     model = request.form.get('model')
+    print("Model: ", model)
 
     # Install TensorFlow using pip if the model is MDV4 - may break things now
     if model == 'MDV4':

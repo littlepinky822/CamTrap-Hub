@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, send_file
 from appstore.utils import get_app_metadata, is_container_running_by_name
-from appstore import app
+from appstore import app, s3_client
 import docker
 import os
 import tarfile
@@ -10,6 +10,8 @@ import zipfile
 
 bp = Blueprint("camera_trap_tools", __name__, url_prefix="/camera-trap-tools")
 client = docker.from_env()
+BUCKET_NAME = app.config['S3_BUCKET_NAME']
+S3_FOLDER = 'uploads'
 
 @bp.route("/start", methods=["GET", "POST"])
 def start_camera_trap_tools():
@@ -59,9 +61,29 @@ def autocopy_upload():
     img_dest_path = '/app/data/SD_Card_Images'
 
     # Save image files to local directory
-    images = request.files.getlist('image-files')
-    for image in images:
-        image.save(os.path.join(img_src_path, image.filename))
+    uploaded_images = []
+    image_paths = request.form.getlist('images')
+    for s3_path in image_paths:
+        try:
+            # Extract the filename from the S3 path
+            filename = os.path.basename(s3_path)
+            local_file_path = os.path.join(img_src_path, filename)
+            print("Local file path: ", local_file_path)
+            
+            # Download the file from S3
+            s3_client.download_file(BUCKET_NAME, s3_path, local_file_path)
+            
+            if os.path.exists(local_file_path):
+                uploaded_images.append(filename)
+            else:
+                return jsonify({"status": "error", "message": f"Failed to download {filename} from S3"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Error processing {s3_path}: {str(e)}"})
+    
+    if len(uploaded_images) == len(image_paths):
+        print("Images downloaded from S3")
+    else:
+        print("Some images failed to download from S3. Files: ", uploaded_images)
 
     # Copy local files to container
     tar_stream = io.BytesIO()

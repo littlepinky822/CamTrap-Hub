@@ -1,16 +1,36 @@
 import React, { useState } from 'react';
 import NavBar from './NavBar';
+import ImageBrowserPopup from './ImageBrowserPopup';
 
 const Il2bb = () => {
     const [theme, setTheme] = useState('nature');
-    const [imageFiles, setImageFiles] = useState([]);
     const [mappingFile, setMappingFile] = useState(null);
     const [processing, setProcessing] = useState(false);
     const [success, setSuccess] =  useState(false);
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [allowedTypes, setAllowedTypes] = useState([]);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    const handleUpload = (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
+    const handleOpenFileBrowser = () => {
+        let allowedTypes = ['image'];
+        setAllowedTypes(allowedTypes);
+        document.getElementById('file_browser_modal').showModal();
+    };
+
+    const handleSelectItems = (items) => {
+        setSelectedItems(items);
+    };
+
+    const handleUpload = () => {
+        const formData = new FormData();
+
+        if (mappingFile) {
+            formData.append('mappingFile', mappingFile);
+        }
+
+        selectedItems.forEach(item => {
+            formData.append('images', item.path);
+        });
 
         fetch('/api/il2bb/upload', {
             method: 'POST',
@@ -20,13 +40,8 @@ const Il2bb = () => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+            setUploadSuccess(true);
             return response.json();
-        })
-        .then(data => {
-            // Update state with the names of uploaded files
-            console.log('Retrieved data: ', data);
-            setImageFiles(data.imageFiles);
-            setMappingFile(data.mappingFile);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -89,59 +104,56 @@ const Il2bb = () => {
 
                 <div className="bg-base-200 shadow-md rounded-lg p-6 mb-8">
                     <h2 className="text-2xl font-semibold mb-4">Upload Data</h2>
-                    <form onSubmit={handleUpload} className="space-y-4">
-                        <div>
-                            <div>
-                                {/* <h3>Instructions</h3> */}
-                                <h3 className="text-lg font-semibold mb-2">Label Map (CSV file)</h3>
-                                <p className="text-sm text-gray-700">The main input to the batching stage is a simple csv file (no header row) with two fields:</p>
-                                <ul className="list-disc list-inside text-sm text-gray-700">
-                                    <li>image file name</li>
-                                    <li>label</li>
+                    {/* CSV file */}
+                    <div>
+                        <h3 className="text-lg font-semibold mb-2">Label Map (CSV file)</h3>
+                        <p className="text-sm text-gray-700">The main input to the batching stage is a simple csv file (no header row) with two fields:</p>
+                        <ul className="list-disc list-inside text-sm text-gray-700">
+                            <li>image file name</li>
+                            <li>label</li>
+                        </ul>
+                        <p className="text-sm text-gray-700">*Note: The IL2BB pipeline expects all of the targets in the image to be of the same species. When creating your label map, skip any images that have more than one species in them. Images can have multiple targets of the same species.</p>
+                        <p className="text-sm text-gray-700">See <a className="link" href="https://github.com/persts/IL2BB/tree/main/UseCase">here</a> for more details.</p>
+                        <label htmlFor="mapping-file" className="block text-sm font-medium text-gray-700 mt-4 mb-2">
+                            Label Map (CSV file):
+                        </label>
+                        <input 
+                            type="file" 
+                            name="mapping-file" 
+                            accept=".csv" 
+                            className="file-input file-input-bordered file-input-primary bg-white w-full max-w-xs" 
+                            onChange={(e) => setMappingFile(e.target.files[0])}
+                        />
+                        {mappingFile && (
+                            <div className="mt-4">
+                                <p className="font-semibold">Uploaded label CSV file:</p>
+                                <ul>
+                                    <li>{mappingFile.name}</li>
                                 </ul>
-                                <p className="text-sm text-gray-700">*Note: The IL2BB pipeline expects all of the targets in the image to be of the same species. When creating your label map, skip any images that have more than one species in them. Images can have multiple targets of the same species.</p>
-                                <p className="text-sm text-gray-700">See <a className="link" href="https://github.com/persts/IL2BB/tree/main/UseCase">here</a> for more details.</p>
-                                <label htmlFor="mapping-file" className="block text-sm font-medium text-gray-700 mt-4 mb-2">
-                                    Label Map (CSV file):
-                                </label>
-                                <input 
-                                    type="file" 
-                                    name="mapping-file" 
-                                    accept=".csv" 
-                                    className="file-input file-input-bordered file-input-primary bg-white w-full max-w-xs" 
-                                />
                             </div>
-                            <label htmlFor="image-files" className="block text-sm font-medium text-gray-700 mb-2">
-                                Upload image(s):
-                            </label>
-                            <input
-                                type="file"
-                                name="image-files"
-                                accept="image/*"
-                                multiple
-                                className="file-input file-input-primary bg-white w-full max-w-xs"
-                            />
-                        </div>
-                        <button type="submit" className="btn btn-primary">Upload</button>
-                    </form>
-
-                    {mappingFile && (
-                        <div className="mt-4">
-                            <p className="font-semibold">Uploaded label CSV file:</p>
-                            <ul>
-                                <li>{mappingFile}</li>
-                            </ul>
-                        </div>
-                    )}
-
-                    {imageFiles && imageFiles.length > 0 && (
-                        <div className="mt-4">
-                            <p className="font-semibold">Uploaded images:</p>
-                            <ul>
-                                {imageFiles.map((image, index) => (
-                                    <li key={index}>{image}</li>
-                                ))}
-                            </ul>
+                        )}
+                    </div>
+                    {/* Images */}
+                    <div className="mt-2">
+                        <label htmlFor="images" className="block text-sm font-medium text-gray-700 mb-2">
+                            Images:
+                        </label>
+                        <button onClick={() => handleOpenFileBrowser()} name="images" className="btn btn-primary mr-2">Select Images</button>
+                        {selectedItems.length > 0 && (
+                            <div className="mt-4">
+                                <h3>Selected Images:</h3>
+                                <ul>
+                                    {selectedItems.map((item, index) => (
+                                        <li key={index}>{item.name} ({item.type})</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                    <button className='btn btn-primary mt-4' onClick={handleUpload}>Upload Selected Items</button>
+                    {uploadSuccess && (
+                        <div role="alert" className="alert alert-success mt-4">
+                            <span>Uploaded successfully!</span>
                         </div>
                     )}
                 </div>
@@ -192,6 +204,7 @@ const Il2bb = () => {
                     <button className='btn btn-primary mt-4' onClick={handleDownload}>Download results</button>
                 </div>
             </div>
+            <ImageBrowserPopup onSelect={handleSelectItems} allowedTypes={allowedTypes} />
         </div>
     );
 };
