@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import NavBar from './NavBar';
 import ImageBrowserPopup from './ImageBrowserPopup';
 
@@ -183,8 +183,8 @@ const WildcoFaceBlur = () => {
                                 {dateFolders ? dateFolders : 'Date folders'}
                             </div>
                             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-full max-w-xs">
-                                <li><a onClick={() => setDateFolders('false')}>False</a></li>
-                                <li><a onClick={() => setDateFolders('true')}>True</a></li>
+                                <li><button onClick={() => setDateFolders('false')}>False</button></li>
+                                <li><button onClick={() => setDateFolders('true')}>True</button></li>
                             </ul>
                         </div>
                         <div>

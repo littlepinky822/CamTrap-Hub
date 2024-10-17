@@ -55,7 +55,7 @@ function NavBar() {
                 </label>
                 <ul className="menu menu-horizontal px-1 text-primary font-bold">
                     <li><a onClick={() => window.location.href = '/'}>Home</a></li>
-                    <li><a>About</a></li>
+                    <li><a onClick={() => window.location.href = '/about'}>About</a></li>
                     <li><a>Contact</a></li>
                     {isLoggedIn ? (
                         <div className="dropdown dropdown-end">
@@ -67,7 +67,7 @@ function NavBar() {
                             <ul
                                 tabIndex={0}
                                 className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-                                <li><a>Profile</a></li>
+                                <li><a onClick={() => window.location.href = '/profile'}>Profile</a></li>
                                 <li><a onClick={() => window.location.href = '/datamanagement'}>Data management</a></li>
                                 <li><a onClick={handleLogout}>Logout</a></li>
                             </ul>

@@ -1,6 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 function Preview({ appInfo, onClose }) {
+    const [logoError, setLogoError] = useState(false);
+
+    const handleLogoError = () => {
+        setLogoError(true);
+    };
 
     const onClickAniml = () => {
         fetch('/api/animl/start', {
@@ -141,11 +146,41 @@ function Preview({ appInfo, onClose }) {
         });
     }
 
+    const onClickCameraTrapWorkflow = () => {
+        const loadingElement = document.getElementById('loading');
+        loadingElement.style.display = 'block';
+
+        fetch('/api/camera-trap-workflow/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'running') {
+                window.location.href = '/camera-trap-workflow';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            loadingElement.style.display = 'none';
+        });
+    }
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-lg max-w-2xl w-full">
                 <div className="flex flex-row items-center">
-                    <img src={appInfo.logo} alt={appInfo.name} className="w-32 h-32 object-cover mr-4" />
+                    {!logoError ? (
+                        <img src={appInfo.logo} alt={appInfo.name} className="w-32 h-32 object-cover mr-4" onError={handleLogoError}/>
+                    ) : (
+                        <div className="avatar placeholder mr-4">
+                            <div className="bg-accent text-neutral-content w-24 rounded">
+                                <span className="text-2xl text-primary text-center">{appInfo.name}</span>
+                            </div>
+                        </div>
+                    )}
                     <div className="flex flex-col">
                         <h2 className="text-2xl font-bold mb-4 text-primary">{appInfo.name}</h2>
                         <div className="rating mb-2">
@@ -183,6 +218,8 @@ function Preview({ appInfo, onClose }) {
                             onClickCameraTrapTools();
                         } else if (appInfo.name === 'WildCo-FaceBlur') {
                             onClickWildCoFaceBlur();
+                        } else if (appInfo.name === 'Camera Trap Workflow') {
+                            onClickCameraTrapWorkflow();
                         } else {
                             window.location.href = appInfo.link;
                         }

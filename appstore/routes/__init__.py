@@ -8,3 +8,4 @@ from .il2bb import bp as il2bb_bp
 from .cameraTrapTools import bp as camera_trap_tools_bp
 from .wildCoFaceBlur import bp as wildCoFaceBlur_bp
 from .dataSpace import bp as dataSpace_bp
+from .cameraTrapWorkflow import bp as cameraTrapWorkflow_bp

@@ -174,10 +174,10 @@ function ZambaTrain() {
                                 {model ? model : 'Model'}
                             </div>
                             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-full max-w-xs">
-                                <li><a onClick={() => setModel('time_distributed')}>time_distributed (default)</a></li>
-                                <li><a onClick={() => setModel('blank_nonblank')}>blank_nonblank</a></li>
-                                <li><a onClick={() => setModel('slowfast')}>slowfast</a></li>
-                                <li><a onClick={() => setModel('european')}>european</a></li>
+                                <li><button onClick={() => setModel('time_distributed')}>time_distributed (default)</button></li>
+                                <li><button onClick={() => setModel('blank_nonblank')}>blank_nonblank</button></li>
+                                <li><button onClick={() => setModel('slowfast')}>slowfast</button></li>
+                                <li><button onClick={() => setModel('european')}>european</button></li>
                             </ul>
                         </div>
 
@@ -189,8 +189,8 @@ function ZambaTrain() {
                                 {dryRun ? dryRun : 'Dry run'}
                             </div>
                             <ul tabIndex={0} className='dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-full max-w-xs'>
-                                <li><a onClick={() => setDryRun('false')}>false</a></li>
-                                <li><a onClick={() => setDryRun('true')}>true</a></li>
+                                <li><button onClick={() => setDryRun('false')}>false</button></li>
+                                <li><button onClick={() => setDryRun('true')}>true</button></li>
                             </ul>
                         </div>
                     </div>

@@ -7,7 +7,6 @@ from flask_sqlalchemy import SQLAlchemy
 import boto3
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-# app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 
 # Enable CORS for all routes
 CORS(app, supports_credentials=True)
@@ -44,7 +43,7 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 # Import and register blueprints
-from appstore.routes import main_bp, zamba_bp, trapper_bp, animl_bp, megadetector_bp, ecosecrets_bp, il2bb_bp, camera_trap_tools_bp, wildCoFaceBlur_bp, dataSpace_bp
+from appstore.routes import main_bp, zamba_bp, trapper_bp, animl_bp, megadetector_bp, ecosecrets_bp, il2bb_bp, camera_trap_tools_bp, wildCoFaceBlur_bp, dataSpace_bp, cameraTrapWorkflow_bp
 
 app.register_blueprint(main_bp)
 app.register_blueprint(zamba_bp)
@@ -56,13 +55,13 @@ app.register_blueprint(il2bb_bp)
 app.register_blueprint(camera_trap_tools_bp)
 app.register_blueprint(wildCoFaceBlur_bp)
 app.register_blueprint(dataSpace_bp)
-
+app.register_blueprint(cameraTrapWorkflow_bp)
 # Import utils after app initialization
-from appstore.utils import trapper_metadata, create_app_metadata, animl_metadata, ecosecrets_metadata, il2bb_metadata, cameratraptools_metadata, wildcofaceblur_metadata
+from appstore.utils import create_app_metadata, trapper_metadata, animl_metadata, ecosecrets_metadata, il2bb_metadata, cameratraptools_metadata, wildcofaceblur_metadata, cameratrapworkflow_metadata, zamba_metadata, megadetector_metadata
 
 # Create app metadata if it doesn't exist
 def create_initial_metadata():
-    for app_name in ['Trapper', 'Animl', 'EcoSecrets', 'IL2BB', 'CameraTrapTools', 'WildCoFaceBlur']:
+    for app_name in ['Trapper', 'Animl', 'EcoSecrets', 'IL2BB', 'CameraTrapTools', 'WildCoFaceBlur', 'CameraTrapWorkflow', 'Zamba', 'MegaDetector']:
         existing = AppMetadata.query.filter_by(name=app_name).first()
         if not existing:
             app_metadata = globals()[f"{app_name.lower()}_metadata"]

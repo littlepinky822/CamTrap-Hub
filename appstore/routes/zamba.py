@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file
 from appstore import celery, app, s3_client
 from appstore.utils import process_zamba_task, train_zamba_task
 from sqlalchemy import MetaData, Table

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import ImageBrowserPopup from './ImageBrowserPopup';
 
 function ZambaProcess() {
-    const [uploadedFiles, setUploadedFiles] = useState([]);
     const [taskId, setTaskId] = useState(null);
     const [taskStatus, setTaskStatus] = useState(null);
     const [mediaType, setMediaType] = useState('video');
@@ -128,8 +127,8 @@ function ZambaProcess() {
                                 {mediaType ? mediaType : 'Media type'}
                             </div>
                             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-full max-w-xs">
-                                <li><a onClick={() => setMediaType('video')}>Video</a></li>
-                                <li><a onClick={() => setMediaType('image')}>Image</a></li>
+                                <li><button onClick={() => setMediaType('video')}>Video</button></li>
+                                <li><button onClick={() => setMediaType('image')}>Image</button></li>
                             </ul>
                         </div>
 
@@ -141,8 +140,8 @@ function ZambaProcess() {
                                 {dryRun ? dryRun : 'Dry run'}
                             </div>
                             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-full max-w-xs">
-                                <li><a onClick={() => setDryRun('false')}>False</a></li>
-                                <li><a onClick={() => setDryRun('true')}>True</a></li>
+                                <li><button onClick={() => setDryRun('false')}>False</button></li>
+                                <li><button onClick={() => setDryRun('true')}>True</button></li>
                             </ul>
                         </div>
 
@@ -154,8 +153,8 @@ function ZambaProcess() {
                                 {outputClassname ? outputClassname : 'Output class name only'}
                             </div>
                             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-full max-w-xs">
-                                <li><a onClick={() => setOutputClassname('false')}>False</a></li>
-                                <li><a onClick={() => setOutputClassname('true')}>True</a></li>
+                                <li><button onClick={() => setOutputClassname('false')}>False</button></li>
+                                <li><button onClick={() => setOutputClassname('true')}>True</button></li>
                             </ul>
                         </div>
 
@@ -167,10 +166,10 @@ function ZambaProcess() {
                                 {selectedModel ? selectedModel : 'Choose a pretrained model'}
                             </div>
                             <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-white rounded-box w-full max-w-xs">
-                                <li><a onClick={() => setSelectedModel('time_distributed')}>time_distributed (default)</a></li>
-                                <li><a onClick={() => setSelectedModel('blank_nonblank')}>blank_nonblank</a></li>
-                                <li><a onClick={() => setSelectedModel('slowfast')}>slowfast</a></li>
-                                <li><a onClick={() => setSelectedModel('european')}>european</a></li>
+                                <li><button onClick={() => setSelectedModel('time_distributed')}>time_distributed (default)</button></li>
+                                <li><button onClick={() => setSelectedModel('blank_nonblank')}>blank_nonblank</button></li>
+                                <li><button onClick={() => setSelectedModel('slowfast')}>slowfast</button></li>
+                                <li><button onClick={() => setSelectedModel('european')}>european</button></li>
                             </ul>
                         </div>
 

@@ -3,13 +3,28 @@ import Preview from './Preview';
 
 function ApplicationCard({ appInfo }) {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
+    const handleImageError = () => {
+        setImageError(true);
+    };
 
     return (
         <div className="card bg-base-100 w-96 shadow-xl">
             <figure className="w-full h-48 bg-base-200">
-                <img
-                src={appInfo.image}
-                alt={appInfo.name} />
+                {!imageError ? (
+                    <img
+                        src={appInfo.image}
+                        alt={appInfo.name}
+                        onError={handleImageError}
+                    />
+                ) : (
+                    <div className="avatar placeholder">
+                        <div className="bg-accent text-neutral-content w-40 rounded-full">
+                            <span className="text-3xl text-primary text-center">{appInfo.name}</span>
+                        </div>
+                    </div>
+                )}
             </figure>
             <div className="card-body">
                 <h2 className="card-title">{appInfo.name}</h2>

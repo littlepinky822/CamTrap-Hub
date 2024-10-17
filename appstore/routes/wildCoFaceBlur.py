@@ -140,9 +140,6 @@ def upload():
                         info.size = len(file_obj.getvalue())
                         tar.addfile(info, file_obj)
 
-                        # Debug print
-                        print(f"Added to tar archive: {file_name}")
-
                     # After the loop, print out what's been saved to docker
                     print("Files saved to Docker:")
                     for member in tar.getmembers():

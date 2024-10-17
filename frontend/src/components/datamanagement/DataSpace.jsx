@@ -232,8 +232,8 @@ const DataSpace = () => {
                             <div id="action-bar" className="flex justify-between items-center mb-4">
                                 <div className="breadcrumbs text-sm ml-4">
                                     <ul>
-                                        <li><a>Home</a></li>
-                                        <li><a>Documents</a></li>
+                                        <li>Home</li>
+                                        <li>Documents</li>
                                         <li>Add Document</li>
                                     </ul>
                                 </div>

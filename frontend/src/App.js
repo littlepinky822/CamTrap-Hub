@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Home from './components/Home';
+import About from './components/About';
 import Login from './components/Login';
+import PrivateRoute from './components/PrivateRoute';
+import Profile from './components/Profile';
 import Register from './components/Register';
 import DataManagement from './components/DataManagement';
 import MegaDetector from './components/MegaDetector';
@@ -10,6 +13,7 @@ import Il2bb from './components/Il2bb';
 import WildcoFaceBlur from './components/WildcoFaceBlur';
 import Preview from './components/Preview';
 import CameraTrapTools from './components/CameraTrapTools';
+import CameraTrapWorkflow from './components/CameraTrapWorkflow';
 import ImageBrowserPopup from './components/ImageBrowserPopup';
 import { MegaDetectorReport, MegaDetectorDetectionsAnimalReport } from './components/MegaDetectorReport';
 import { BrowserRouter as Router,Routes, Route } from 'react-router-dom';
@@ -30,9 +34,13 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/datamanagement" element={<DataManagement />} />
+            <Route element={<PrivateRoute />}>
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/datamanagement" element={<DataManagement />} />
+            </Route>
             <Route path="/preview/:appName" element={<Preview />} />
             <Route path="/megadetector" element={<MegaDetector />} />
             <Route path="/zamba" element={<Zamba />} />
@@ -43,6 +51,7 @@ function App() {
             <Route path="/camera-trap-tools" element={<CameraTrapTools />} />
             <Route path="/wildcofaceblur" element={<WildcoFaceBlur />} />
             <Route path="/image-browser-popup" element={<ImageBrowserPopup />} />
+            <Route path="/camera-trap-workflow" element={<CameraTrapWorkflow />} />
           </Routes>
         </Router>
       </AuthProvider>

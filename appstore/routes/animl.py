@@ -9,14 +9,18 @@ bp = Blueprint('animl', __name__, url_prefix='/animl')
 
 @bp.route('/start', methods=['POST'])
 def start_animl():
-    start_animl_endpoint()
+    response, status_code = start_animl_endpoint()
+    if status_code != 202:
+        return response, status_code
 
     max_retries = 60
     retries = 0
-    animl_url = "http://127.0.0.1:5173/"
+    internal_url = "http://animl-container:5173/"
+    external_url = "http://localhost:5173/"  # This is the URL that the frontend will use
     while retries < max_retries:
-        if is_container_running_by_name('animl-container') and is_server_ready(animl_url):
-            return jsonify({'status': 'running', 'url': animl_url}), 200
+        if is_container_running_by_name('animl-container'):
+            if is_server_ready(internal_url):
+                return jsonify({'status': 'running', 'url': external_url}), 200
         time.sleep(5)
         retries += 1
 
@@ -48,7 +52,16 @@ def start_animl_endpoint():
             image.id,
             name='animl-container',
             ports={'5173/tcp': 5173},
-            detach=True
+            detach=True,
+            network='appstore_network'
         )
+
+    # Ensure the container is connected to the appstore_network
+    appstore_network = client.networks.get('appstore_network')
+    try:
+        appstore_network.connect(container)
+    except docker.errors.APIError as e:
+        if 'already exists' not in str(e):
+            raise
 
     return jsonify({'message': 'Animl started', 'container_id': container.id}), 202

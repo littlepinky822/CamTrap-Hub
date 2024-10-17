@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, jsonify, send_file, send_from_directory, current_app
+from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from appstore import app, s3_client
 from megadetector.detection.run_detector_batch import load_and_run_detector_batch, write_results_to_file
 from megadetector.postprocessing.postprocess_batch_results import process_batch_results, PostProcessingOptions
@@ -78,14 +78,12 @@ def postprocess_results(output_file, image_folder):
 
 @bp.route('/report')
 def megadetector_report():
-    # return render_template('megadetector-results/index.html')
     with open(os.path.join(current_app.root_path, 'templates', 'megadetector-results', 'index.html'), 'r') as file:
         html_content = file.read()
     return jsonify({"html_content": html_content})
 
 @bp.route('/detections_animal.html')
 def megadetector_detections_animal_report():
-    # return render_template('megadetector-results/detections_animal.html')
     with open(os.path.join(current_app.root_path, 'templates', 'megadetector-results', 'detections_animal.html'), 'r') as file:
         html_content = file.read()
     return jsonify({"html_content": html_content})

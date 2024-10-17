@@ -173,7 +173,6 @@ def download():
             return jsonify({'error': 'Failed to list files in the container'}), 500
         
         files = exec_result.output.decode('utf-8').split('\n')
-        print(f"Files found: {files}")  # Debug print
 
         for file_path in files:
             if file_path.strip():

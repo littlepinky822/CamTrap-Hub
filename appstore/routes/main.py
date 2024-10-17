@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, jsonify, send_from_directory, current_app, request, session
+from flask import Blueprint, jsonify, send_from_directory, current_app, request, session
 from appstore import celery, bcrypt, db
-from appstore.models import User, get_uuid
+from appstore.models import User, get_uuid, AppMetadata
 from flask_login import login_user, logout_user, current_user, login_required
-from sqlalchemy import text
 import os
+import docker
+from datetime import datetime
+import pytz
 
 bp = Blueprint('main', __name__)
 
@@ -64,7 +66,9 @@ def get_user():
         return jsonify({
             'id': current_user.id,
             'username': current_user.username,
-            'email': current_user.email
+            'email': current_user.email,
+            'organisation': current_user.organisation,
+            'title': current_user.title
         }), 200
     else:
         return jsonify({'message': 'Not authenticated'}), 401    
@@ -79,19 +83,99 @@ def task_status(task_id):
     }
     return jsonify(data)
 
-# uncatergorised routes
-@bp.route('/Users/<path:filepath>')
-def serve_user_files(filepath):
-    # This route handles the absolute paths in the HTML
-    if 'static' in filepath:
-        relative_path = filepath.split('static/')[-1]
-        return send_from_directory(os.path.join(current_app.root_path, 'static'), relative_path)
-    elif 'templates' in filepath:
-        relative_path = filepath.split('templates/')[-1]
-        return send_from_directory(os.path.join(current_app.root_path, 'templates'), relative_path)
-    return "File not found", 404
+@bp.route('/profile/update', methods=['POST'])
+@login_required
+def update_user():
+    data = request.json
+    print('Data received: ', data)
+    current_user.username = data.get('username', current_user.username)
+    current_user.email = data.get('email', current_user.email)
+    current_user.organisation = data.get('organisation', current_user.organisation)
+    current_user.title = data.get('title', current_user.title)
+    try:
+        db.session.commit()
+        return jsonify({'message': 'User updated successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': f'Error updating user: {str(e)}'}), 500
 
-# TEST: Render JSON reponse for the frontend
-@bp.route('/test')
-def test():
-    return jsonify({'message': 'Render successful!'})
+@bp.route('/apps', methods=['GET'])
+def get_apps():
+    apps = AppMetadata.query.all()
+    apps_list = []
+    for app in apps:
+        apps_list.append({
+            'id': app.id,
+            'name': app.name,
+            'display_name': app.display_name,
+            'description': app.description,
+            'full_description': app.full_description,
+            'logo': app.logo,
+            'image': app.image,
+            'link': app.link,
+            'tags': app.tags,
+            'repository_url': app.repository_url
+        })
+    return jsonify(apps_list), 200
+
+@bp.route('/apps/usage', methods=['GET'])
+def get_apps_usage():
+    client = docker.from_env()
+    containers = client.containers.list(all=True)
+    usage_data = {}
+    total_runtime = 0
+
+    def parse_docker_time(time_str):
+        # Remove nanoseconds
+        time_str = time_str.split('.')[0] + 'Z'
+        return datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.UTC)
+
+    for container in containers:
+        container_info = container.attrs
+        labels = container_info['Config']['Labels']
+        
+        # Check if the container is part of a stack
+        if 'com.docker.compose.project' in labels:
+            app_name = labels['com.docker.compose.project']
+        else:
+            app_name = container_info['Name'].strip('/')
+
+        state = container_info['State']
+
+        if state['Status'] == 'running':
+            start_time = parse_docker_time(state['StartedAt'])
+            current_time = datetime.now(pytz.utc)
+            runtime = (current_time - start_time).total_seconds()
+        else:
+            if state['FinishedAt'] != '0001-01-01T00:00:00Z':
+                start_time = parse_docker_time(state['StartedAt'])
+                end_time = parse_docker_time(state['FinishedAt'])
+                runtime = (end_time - start_time).total_seconds()
+            else:
+                runtime = 0
+
+        if app_name not in usage_data:
+            usage_data[app_name] = {
+                'runtime_seconds': 0,
+                'status': 'running' if state['Status'] == 'running' else 'stopped'
+            }
+
+        usage_data[app_name]['runtime_seconds'] += runtime
+        if state['Status'] == 'running':
+            usage_data[app_name]['status'] = 'running'
+
+        total_runtime += runtime
+
+    # Convert dictionary to list for JSON serialization
+    usage_list = [
+        {
+            'app_name': app_name,
+            'runtime_seconds': data['runtime_seconds'],
+            'status': data['status']
+        } for app_name, data in usage_data.items()
+    ]
+
+    return jsonify({
+        'usage_data': usage_list,
+        'total_runtime': total_runtime
+    }), 200
