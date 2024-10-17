@@ -1,0 +1,19 @@
+.report-container img {
+    @apply max-w-full h-auto rounded-lg shadow-md;
+}
+
+.report-container a {
+    @apply link link-primary hover:link-secondary;
+}
+
+.report-container h2 {
+    @apply text-2xl font-semibold mb-4;
+}
+
+.report-container h3 {
+    @apply text-xl font-semibold mb-4;
+}
+
+.report-container p {
+    @apply text-lg mb-4;
+}
