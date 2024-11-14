@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, send_from_directory, current_app, request, session
-from appstore import celery, bcrypt, db
+from appstore import app, celery, bcrypt, db, s3_client
 from appstore.models import User, get_uuid, AppMetadata
 from flask_login import login_user, logout_user, current_user, login_required
 import os
@@ -71,7 +71,12 @@ def get_user():
             'title': current_user.title
         }), 200
     else:
-        return jsonify({'message': 'Not authenticated'}), 401    
+        return jsonify({'message': 'Not authenticated'}), 401   
+
+@bp.route('/user/number', methods=['GET'])
+def get_user_number():
+    user_number = User.query.count()
+    return jsonify({'user_number': user_number}), 200
 
 @bp.route('/task_status/<task_id>', methods=['GET'])
 def task_status(task_id):
@@ -179,3 +184,20 @@ def get_apps_usage():
         'usage_data': usage_list,
         'total_runtime': total_runtime
     }), 200
+
+@bp.route('/data/number', methods=['GET'])
+def get_s3_data_number():
+    bucket_name = app.config['S3_BUCKET_NAME']
+    s3_folder = 'uploads/'  # Default folder to check
+    
+    try:
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_folder)
+        file_count = sum(1 for obj in response.get('Contents', []) if obj['Key'] != s3_folder)
+        
+        return jsonify({
+            'total_files': file_count
+        }), 200
+        
+    except Exception as e:
+        print(f"Error getting file count from S3: {str(e)}")
+        return jsonify({'error': 'Failed to get file count from S3'}), 500
