@@ -1,4 +1,5 @@
 # CamTrap Hub - An all-in-one platform for camera trap data management and processing
+![Alt text](frontend/public/home_screenshot.png)
 
 ## Overview
 CamTrap Hub is an integrated platform designed to streamline the process of managing and analyzing data from camera traps. This tool centralises various open-source applications and tools under one roof, providing researchers and conservationists with easy access to powerful resources for wildlife monitoring and research.
