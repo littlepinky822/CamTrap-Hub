@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
-import NavBar from './NavBar';
+import NavBar from '../NavBar';
 import ZambaProcess from './ZambaProcess';
 import ZambaTrain from './ZambaTrain';
-import { ThemeContext } from '../ThemeContext';
+import { ThemeContext } from '../../ThemeContext';
 
 const Zamba = () => {
     const [activeTab, setActiveTab] = useState('classification');

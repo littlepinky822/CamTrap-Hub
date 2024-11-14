@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import ImageBrowserPopup from './ImageBrowserPopup';
+import ImageBrowserPopup from '../ImageBrowserPopup';
 
 function ZambaTrain() {
     const [labelCsv, setLabelCsv] = useState(null);

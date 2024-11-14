@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import './MegaDetectorReport.css';
-import { ThemeContext } from '../ThemeContext';
-import NavBar from './NavBar';
+import { ThemeContext } from '../../ThemeContext';
+import NavBar from '../NavBar';
 
 const MegaDetectorReport = () => {
     const [htmlContent, setHtmlContent] = useState('');
