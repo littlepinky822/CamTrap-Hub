@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import NavBar from './NavBar';
-import ImageBrowserPopup from './ImageBrowserPopup';
+import NavBar from '../NavBar';
+import ImageBrowserPopup from '../ImageBrowserPopup';
 
 const Il2bb = () => {
     const [theme, setTheme] = useState('nature');

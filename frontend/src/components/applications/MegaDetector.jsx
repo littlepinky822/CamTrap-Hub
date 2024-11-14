@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
-import NavBar from './NavBar';
-import { ThemeContext } from '../ThemeContext';
-import ImageBrowserPopup from './ImageBrowserPopup';
+import NavBar from '../NavBar';
+import { ThemeContext } from '../../ThemeContext';
+import ImageBrowserPopup from '../ImageBrowserPopup';
 
 const MegaDetector = () => {
     const { theme, setTheme } = useContext(ThemeContext);

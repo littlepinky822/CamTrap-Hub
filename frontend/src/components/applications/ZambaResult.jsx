@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
-import NavBar from './NavBar';
-import { ThemeContext } from '../ThemeContext';
+import NavBar from '../NavBar';
+import { ThemeContext } from '../../ThemeContext';
 
 function ZambaResult() {
     const { theme, setTheme } = useContext(ThemeContext);

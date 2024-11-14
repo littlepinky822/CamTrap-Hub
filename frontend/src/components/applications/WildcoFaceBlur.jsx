@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import NavBar from './NavBar';
-import ImageBrowserPopup from './ImageBrowserPopup';
+import NavBar from '../NavBar';
+import ImageBrowserPopup from '../ImageBrowserPopup';
 
 const WildcoFaceBlur = () => {
     const [selectedItems, setSelectedItems] = useState([]);

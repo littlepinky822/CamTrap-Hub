@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
-import NavBar from './NavBar';
-import { ThemeContext } from '../ThemeContext';
-import ImageBrowserPopup from './ImageBrowserPopup';
+import NavBar from '../NavBar';
+import { ThemeContext } from '../../ThemeContext';
+import ImageBrowserPopup from '../ImageBrowserPopup';
 
 const CameraTrapTools = () => {
     const [activeTab, setActiveTab] = useState('imageProcessing');
