@@ -15,19 +15,19 @@ function ApplicationCard({ appInfo }) {
                 {!imageError ? (
                     <img
                         src={appInfo.image}
-                        alt={appInfo.name}
+                        alt={appInfo.display_name}
                         onError={handleImageError}
                     />
                 ) : (
                     <div className="avatar placeholder">
                         <div className="bg-accent text-neutral-content w-40 rounded-full">
-                            <span className="text-3xl text-primary text-center">{appInfo.name}</span>
+                            <span className="text-3xl text-primary text-center">{appInfo.display_name}</span>
                         </div>
                     </div>
                 )}
             </figure>
             <div className="card-body">
-                <h2 className="card-title">{appInfo.name}</h2>
+                <h2 className="card-title">{appInfo.display_name}</h2>
                 <p>{appInfo.description}</p>
                 <div className="card-actions justify-between items-center">
                     <div>

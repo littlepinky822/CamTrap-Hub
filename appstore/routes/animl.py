@@ -15,11 +15,11 @@ def start_animl():
 
     max_retries = 60
     retries = 0
-    internal_url = "http://animl-container:5173/"
+    internal_url = "http://animl-container:5173/"  # for Docker
     external_url = "http://localhost:5173/"  # This is the URL that the frontend will use
     while retries < max_retries:
         if is_container_running_by_name('animl-container'):
-            if is_server_ready(internal_url):
+            if is_server_ready(external_url):
                 return jsonify({'status': 'running', 'url': external_url}), 200
         time.sleep(5)
         retries += 1

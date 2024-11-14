@@ -23,7 +23,7 @@ const About = () => {
             <div className="container mx-auto px-4 py-8">
                 <div className="bg-base-200 shadow-md rounded-lg p-6 mb-8">
                     <p className="text-lg text-primary mb-6">
-                    Does the journey from setting up camera traps to analyzing wildlife data seem daunting? Say hello to CamTrap Hub—your ultimate ally in the intricate world of wildlife research. With us, managing camera traps becomes not just manageable but downright enjoyable! Our platform brings together a suite of applications meticulously designed to support every phase of camera trap data processing.
+                    Does the journey from setting up camera traps to analysing wildlife data seem daunting? Say hello to CamTrap Hub—your ultimate ally in the intricate world of wildlife research. With us, managing camera traps becomes not just manageable but downright enjoyable! Our platform brings together a suite of applications meticulously designed to support every phase of camera trap data processing.
                     </p>
                     {/* Timeline - Stages of camera trap data processing */}
                     <h2 className="text-2xl font-bold mb-6 text-primary">This probably is your typical workflow:</h2>

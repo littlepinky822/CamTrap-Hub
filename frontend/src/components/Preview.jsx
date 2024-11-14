@@ -158,6 +158,7 @@ function Preview({ appInfo, onClose }) {
         })
         .then(response => response.json())
         .then(data => {
+            console.log('data', data);
             if (data.status === 'running') {
                 window.location.href = '/camera-trap-workflow';
             }
@@ -173,16 +174,16 @@ function Preview({ appInfo, onClose }) {
             <div className="bg-white p-8 rounded-lg max-w-2xl w-full">
                 <div className="flex flex-row items-center">
                     {!logoError ? (
-                        <img src={appInfo.logo} alt={appInfo.name} className="w-32 h-32 object-cover mr-4" onError={handleLogoError}/>
+                        <img src={appInfo.logo} alt={appInfo.display_name} className="w-32 h-32 object-cover mr-4" onError={handleLogoError}/>
                     ) : (
                         <div className="avatar placeholder mr-4">
                             <div className="bg-accent text-neutral-content w-24 rounded">
-                                <span className="text-2xl text-primary text-center">{appInfo.name}</span>
+                                <span className="text-2xl text-primary text-center">{appInfo.display_name}</span>
                             </div>
                         </div>
                     )}
                     <div className="flex flex-col">
-                        <h2 className="text-2xl font-bold mb-4 text-primary">{appInfo.name}</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-primary">{appInfo.display_name}</h2>
                         <div className="rating mb-2">
                             <input type="radio" name="rating-1" className="mask mask-star bg-secondary" />
                             <input type="radio" name="rating-1" className="mask mask-star bg-secondary" />
@@ -206,24 +207,24 @@ function Preview({ appInfo, onClose }) {
                 </div>
                 <div className="flex justify-between">
                     <button className="btn btn-primary" onClick={() => {
-                        if (appInfo.name === 'Animl') {
+                        if (appInfo.display_name === 'Animl') {
                             onClickAniml();
-                        } else if (appInfo.name === 'Trapper') {
+                        } else if (appInfo.display_name === 'Trapper') {
                             onClickTrapper();
-                        } else if (appInfo.name === 'EcoSecrets') {
+                        } else if (appInfo.display_name === 'EcoSecrets') {
                             onClickEcoSecrets();
-                        } else if (appInfo.name === 'IL2BB') {
+                        } else if (appInfo.display_name === 'IL2BB') {
                             onClickIl2bb();
-                        } else if (appInfo.name === 'Camera Trap Tools') {
+                        } else if (appInfo.display_name === 'Camera Trap Tools') {
                             onClickCameraTrapTools();
-                        } else if (appInfo.name === 'WildCo-FaceBlur') {
+                        } else if (appInfo.display_name === 'WildCo-FaceBlur') {
                             onClickWildCoFaceBlur();
-                        } else if (appInfo.name === 'Camera Trap Workflow') {
+                        } else if (appInfo.display_name === 'Camera Trap Workflow') {
                             onClickCameraTrapWorkflow();
                         } else {
                             window.location.href = appInfo.link;
                         }
-                    }}>Go to {appInfo.name}</button>
+                    }}>Go to {appInfo.display_name}</button>
                     <span id="loading" style={{ display: 'none' }} className="loading loading-spinner loading-xs"></span>
                     <button className="btn btn-secondary" onClick={onClose}>Close</button>
                 </div>

@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 
 @bp.route('/start', methods=['POST'])
 def start_trapper():
-    internal_url = "http://trapper:8000/"
+    internal_url = "http://trapper:8000/" # for docker
     external_url = "http://localhost:8000/"
-    if is_server_ready(internal_url) or is_container_running('trapper'):
+    if is_server_ready(external_url) or is_container_running('trapper'):
         return jsonify({'status': 'running', 'url': external_url}), 200
     
     print("Starting Trapper")
@@ -29,7 +29,7 @@ def start_trapper():
     max_retries = 60
     retries = 0
     while retries < max_retries:
-        if is_container_running('trapper') and is_server_ready(internal_url):
+        if is_container_running('trapper') and is_server_ready(external_url):
             return jsonify({'status': 'running', 'url': external_url}), 200
         time.sleep(5)
         retries += 1
@@ -37,10 +37,9 @@ def start_trapper():
     return jsonify({'error': 'Failed to start Trapper', 'status': 'timeout'}), 500
 
 def start_trapper_endpoint():
-    client = docker.from_env()
     app_metadata = get_app_metadata("Trapper")
-    trapper_dir = Path('/app/appstore/repos/trapper')
-    # trapper_dir = os.path.join(os.path.dirname(__file__), '..', 'repos', 'trapper') # for local testing
+    # trapper_dir = Path('/app/appstore/repos/trapper')
+    trapper_dir = os.path.join(os.path.dirname(__file__), '..', 'repos', 'trapper') # for local testing
     logger.info(f"Trapper directory: {trapper_dir}")
     
     if not os.path.exists(trapper_dir):

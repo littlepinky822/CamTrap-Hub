@@ -59,7 +59,7 @@ datasets: [
     
   
     return(
-    <TitleCard title={"Activity Pattern"} >
+    <TitleCard title={"Activity Pattern (Dummy Data)"} >
         <Line data={data} options={options}/>
     </TitleCard>
     )
