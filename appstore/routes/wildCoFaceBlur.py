@@ -81,13 +81,19 @@ def download():
             if file_path.strip():
                 try:
                     file_data, _ = container.get_archive(file_path)
-                    file_content = io.BytesIO()
+                    # Create a temporary BytesIO to hold the tar data
+                    tar_data = io.BytesIO()
                     for chunk in file_data:
-                        file_content.write(chunk)
-                    file_content.seek(0)
+                        tar_data.write(chunk)
+                    tar_data.seek(0)
 
-                    # add file to zip
-                    zip_file.writestr(file_path.replace(f"{target_path}/", ""), file_content.getvalue())
+                    # Extract the file from the tar archive
+                    with tarfile.open(fileobj=tar_data, mode='r') as tar:
+                        member = tar.next()  # Get the first (and only) file
+                        file_content = tar.extractfile(member).read()
+
+                    # Add the extracted file content to the zip
+                    zip_file.writestr(file_path.replace(f"{target_path}/", ""), file_content)
                 except docker.errors.NotFound:
                     print(f"File not found in the container: {file_path}")
                 except docker.errors.APIError as e:

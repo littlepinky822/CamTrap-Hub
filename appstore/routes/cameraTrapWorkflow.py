@@ -137,20 +137,30 @@ def download_metadata():
             if file_path.strip():
                 try:
                     file_data, _ = container.get_archive(file_path)
-                    tar_stream = io.BytesIO(file_data.read())
-                    tar = tarfile.open(fileobj=tar_stream)
-                    file_content = tar.extractfile(tar.getmembers()[0]).read()
+                    # Create a temporary BytesIO to hold the tar data
+                    tar_data = io.BytesIO()
+                    for chunk in file_data:
+                        tar_data.write(chunk)
+                    tar_data.seek(0)
 
-                    # add file to zip
+                    # Extract the file from the tar archive
+                    with tarfile.open(fileobj=tar_data, mode='r') as tar:
+                        member = tar.next()  # Get the first (and only) file
+                        file_content = tar.extractfile(member).read()
+
+                    # add file to zip with proper path
                     if file_path.startswith(metadata_path):
                         zip_path = f"metadata/{file_path.replace(f'{metadata_path}/', '')}"
                     else:
                         zip_path = f"images_renamed/{file_path.replace(f'{renamed_path}/', '')}"
                     zip_file.writestr(zip_path, file_content)
+
                 except docker.errors.NotFound:
                     print(f"File not found in the container: {file_path}")
                 except docker.errors.APIError as e:
                     print(f"API error getting archive for {file_path}: {str(e)}")
+                except Exception as e:
+                    print(f"Error processing file {file_path}: {str(e)}")
     memory_file.seek(0)
 
     return send_file(

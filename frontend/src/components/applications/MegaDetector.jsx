@@ -9,7 +9,7 @@ const MegaDetector = () => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [allowedTypes, setAllowedTypes] = useState([]);
     const [uploadSuccess, setUploadSuccess] = useState(false);
-
+    const [batchSuccess, setBatchSuccess] = useState(false);
     const handleOpenFileBrowser = (type) => {
         let allowedTypes;
         switch (type) {
@@ -61,6 +61,7 @@ const MegaDetector = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
+        formData.append('model', model);
 
         fetch('/api/megadetector/run/batch', {
             method: 'POST',
@@ -69,6 +70,9 @@ const MegaDetector = () => {
         .then(response => response.json())
         .then(data => {
             console.log(data);
+            if (data.status === 'success') {
+                setBatchSuccess(true);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -143,6 +147,11 @@ const MegaDetector = () => {
                         )}
                         <button type="submit" className="btn btn-primary">Run Batch</button>
                     </form>
+                    {batchSuccess && (
+                        <div role="alert" className="alert alert-success mt-4">
+                            <span>Batch processing completed!</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="mt-8 text-center">
