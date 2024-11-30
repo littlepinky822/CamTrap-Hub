@@ -5,9 +5,8 @@ SECRET_KEY = 'your_secret_key_here'
 DEBUG = True
 
 # AWS S3 settings
-AWS_ACCESS_KEY_ID = 'AKIA2FXAD64WVBFK572X'
-AWS_SECRET_ACCESS_KEY = '462VZngMjz4n2gfAJBeJAB9G5jVtFFC42UBpRYrY'
-# AWS_SECRET_ACCESS_KEY = 'randomsecretkeyidonhavemoneytopay'
+AWS_ACCESS_KEY_ID = 'your_access_key_id'
+AWS_SECRET_ACCESS_KEY = 'your_secret_access_key'
 AWS_REGION = 'eu-west-1'
 S3_BUCKET_NAME = 'camtrap-appstore'
 
@@ -37,10 +36,10 @@ CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # Database settings
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://c22097859:Masterdata822!@csmysql.cs.cf.ac.uk:3306/c22097859_dissertation'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://your_username:your_password@localhost:3306/appstore'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # GitLab container registry settings
-GITLAB_REGISTRY_URL = 'registry.git.cf.ac.uk'
-GITLAB_REGISTRY_USERNAME = 'c22097859'
-GITLAB_ACCESS_TOKEN = 'Ye4xAmRLMarzafBBYznx' # READ_WRITE_REGISTRY
+GITLAB_REGISTRY_URL = 'your_registry_url'
+GITLAB_REGISTRY_USERNAME = 'your_username'
+GITLAB_ACCESS_TOKEN = 'your_token' # READ_WRITE_REGISTRY
