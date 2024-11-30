@@ -19,7 +19,7 @@ def start_animl():
     external_url = "http://localhost:5173/"  # This is the URL that the frontend will use
     while retries < max_retries:
         if is_container_running_by_name('animl-container'):
-            if is_server_ready(external_url):
+            if is_server_ready(internal_url):
                 return jsonify({'status': 'running', 'url': external_url}), 200
         time.sleep(5)
         retries += 1

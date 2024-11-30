@@ -15,7 +15,7 @@ To get started with CamTrap Hub, follow the instructions below to set up the pla
 ### Installation
 1. Clone the repository:
    ```
-   git clone hhttps://github.com/littlepinky822/CamTrap-Hub.git
+   git clone https://github.com/littlepinky822/CamTrap-Hub.git
    cd CamTrap-Hub
    ```
 2. Build and Run with Docker Compose:
